@@ -195,7 +195,7 @@ def loop_time(zone=zone, delay=5, config_path="src/strategy/config", csv_dir="sr
         now = datetime.datetime.now(zone)
 
         if (
-            now.second >= delay and now.minute % 1 == 0 and last_minute_5 != now.minute
+            now.second >= delay and now.minute % 5 == 0 and last_minute_5 != now.minute
         ):  # 测试时改成1, 测试完了改成5
             last_minute_5 = now.minute
             print(now, "last_minute_5")
