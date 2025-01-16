@@ -8,8 +8,8 @@ services:
       - "8000:8000"
 
     volumes:
-      - ~/chameleon-quant/csv:/src/csv
-      - ~/chameleon-quant/strategy:/src/strategy
+      - ~/chameleon-quant/csv:/app/src/csv
+      - ~/chameleon-quant/strategy:/app/src/strategy
 
     environment:
       - PYTHONUNBUFFERED=1
