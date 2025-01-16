@@ -1,0 +1,24 @@
+[project]
+name = "chameleon-quant"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "bokeh>=3.6.2",
+    "bokeh-sampledata>=2024.2",
+    "ipykernel>=6.29.5",
+    "numba>=0.60.0",
+    "numpy>=1.26.4",
+    "setuptools>=75.6.0",
+    "ccxt>=4.4.44",
+    "optunahub>=0.1.0",
+    "optuna-dashboard>=0.17.0",
+    "typer>=0.15.1",
+    "niquests>=3.12.1",
+    "pandas-ta",
+]
+
+
+[tool.pdm]
+

@@ -1,0 +1,10 @@
+**/config.json
+**/csv/*
+**/strategy/*
+
+# Exclude the project virtual environment from image builds
+**/config.yaml
+**/template.yaml
+.venv
+**/__pycache__
+**/*.pyc
