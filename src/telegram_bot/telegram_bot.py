@@ -5,7 +5,7 @@ from bokeh.io import export_png
 from pathlib import Path
 
 
-def push_telegram_channel(config_path, data, fig=None, send_html=True):
+def push_telegram_channel(config_path, data, fig=None, send_html=False):
     with open(config_path, "r", encoding="utf-8") as file:
         config = json.load(file)
 

@@ -5,7 +5,7 @@ services:
 
     # Host the FastAPI application on port 8000
     ports:
-      - "8000:8000"
+      - "2197:2197"
 
     volumes:
       - $USERPROFILE/Downloads/test/csv:/app/src/csv
