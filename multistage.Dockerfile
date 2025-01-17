@@ -28,5 +28,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Run the FastAPI application by default
 # CMD ["fastapi", "dev", "--host", "0.0.0.0", "/app/src/uv_docker_example"]
-CMD ["uv", "run", "python", "./src/telegram_bot/fast_api_demo.py", "&"]
-CMD ["uv", "run", "python", "./src/bot/trading_robot.py"]
+# CMD ["uv", "run", "python", "./src/telegram_bot/fast_api_demo.py", "&"]
+CMD ["uv", "run", "python", "./src/bot/trading_robot.py", "ma"]

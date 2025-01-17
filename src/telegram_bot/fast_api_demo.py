@@ -33,6 +33,6 @@ def main():
     return {"Hello": "World"}
 
 
-if __name__ == "__main__":
+def run():
     print("hello")
-    uvicorn.run("fast_api_demo:app", host="127.0.0.1", port=2197)
+    uvicorn.run("fast_api_demo:app", host="0.0.0.0", port=2197)
