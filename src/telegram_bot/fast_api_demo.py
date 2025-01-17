@@ -34,4 +34,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print("hello")
     uvicorn.run("fast_api_demo:app", host="127.0.0.1", port=2197)
