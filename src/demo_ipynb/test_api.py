@@ -1,7 +1,6 @@
 import niquests
 import json
 import sys
-import platform
 
 if sys.platform.startswith("linux"):
     print("Linux")

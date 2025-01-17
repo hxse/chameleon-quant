@@ -12,6 +12,7 @@ sys.path.append("src")
 from data_api.data_api import get_data_wapper
 from backtest.backtest_framework import backtest_wapper
 from trade_api.trade_api import trade_api_wapper, get_ticker
+from telegram_bot.telegram_bot import push_telegram_channel
 
 time_arr = [{"name": "3s", "time": 3}]
 
@@ -76,8 +77,10 @@ def run_strategy(signal_time, strategy, config_path, csv_dir):
             return [exchange, _s.strategy_params, df, result, fig, _]
 
 
-def run_trade_api(exchange, strategy_params, df, result, fig):
+def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
+    exchange_name = strategy_params["exchange_name"]
     symbol = strategy_params["symbol"]
+
     price = get_ticker(exchange, symbol)
 
     long_tp = None if np.isnan(df.iloc[-1]["long_tp"]) else df.iloc[-1]["long_tp"]
@@ -118,6 +121,19 @@ def run_trade_api(exchange, strategy_params, df, result, fig):
             stopLossParams=long_sl,
             mode="open",
         )
+        push_telegram_channel(
+            config_path,
+            data={
+                "exchange_name": exchange_name,
+                "symbol": symbol,
+                "side": "buy",
+                "price": price,
+                "long_tp": long_tp,
+                "long_sl": long_sl,
+                "long_tsl": long_tsl,
+                "mode": "open",
+            },
+        )
     if df.iloc[-1]["short_status"] == 1:
         trade_api_wapper(
             exchange,
@@ -139,6 +155,19 @@ def run_trade_api(exchange, strategy_params, df, result, fig):
             stopLossParams=short_sl,
             mode="open",
         )
+        push_telegram_channel(
+            config_path,
+            data={
+                "exchange_name": exchange_name,
+                "symbol": symbol,
+                "side": "sell",
+                "price": price,
+                "short_tp": short_tp,
+                "short_sl": short_sl,
+                "short_tsl": short_tsl,
+                "mode": "open",
+            },
+        )
     if df.iloc[-1]["long_status"] == 0:
         trade_api_wapper(
             exchange,
@@ -150,7 +179,15 @@ def run_trade_api(exchange, strategy_params, df, result, fig):
             stopLossParams=None,
             mode="close",
         )
-
+        push_telegram_channel(
+            config_path,
+            data={
+                "exchange_name": exchange_name,
+                "symbol": symbol,
+                "price": price,
+                "mode": "long_close",
+            },
+        )
     if df.iloc[-1]["short_status"] == 0:
         trade_api_wapper(
             exchange,
@@ -162,13 +199,22 @@ def run_trade_api(exchange, strategy_params, df, result, fig):
             stopLossParams=None,
             mode="close",
         )
+        push_telegram_channel(
+            config_path,
+            data={
+                "exchange_name": exchange_name,
+                "symbol": symbol,
+                "price": price,
+                "mode": "short_close",
+            },
+        )
 
 
 def callback(_p, strategy, config_path, csv_dir):
     res = run_strategy(_p, strategy, config_path, csv_dir)
     if res is not None:
         [exchange, strategy_params, df, result, fig, _] = res
-        run_trade_api(exchange, strategy_params, df, result, fig)
+        run_trade_api(exchange, strategy_params, df, result, fig, config_path)
 
 
 def loop_time(
