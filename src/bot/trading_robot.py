@@ -133,6 +133,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "long_tsl": long_tsl,
                 "mode": "open",
             },
+            fig=fig,
         )
     if df.iloc[-1]["short_status"] == 1:
         trade_api_wapper(
@@ -167,6 +168,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "short_tsl": short_tsl,
                 "mode": "open",
             },
+            fig=fig,
         )
     if df.iloc[-1]["long_status"] == 0:
         trade_api_wapper(
@@ -187,6 +189,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "price": price,
                 "mode": "long_close",
             },
+            fig=fig,
         )
     if df.iloc[-1]["short_status"] == 0:
         trade_api_wapper(
@@ -207,6 +210,19 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "price": price,
                 "mode": "short_close",
             },
+            fig=fig,
+        )
+
+    if 1:
+        push_telegram_channel(
+            config_path,
+            data={
+                "exchange_name": exchange_name,
+                "symbol": symbol,
+                "price": price,
+                "mode": "short_close",
+            },
+            fig=fig,
         )
 
 
@@ -243,7 +259,7 @@ def loop_time(
         now = datetime.datetime.now(zone)
 
         if (
-            now.second >= delay and now.minute % 5 == 0 and last_minute_5 != now.minute
+            now.second >= delay and now.minute % 1 == 0 and last_minute_5 != now.minute
         ):  # 测试时改成1, 测试完了改成5
             last_minute_5 = now.minute
             print(now, "last_minute_5")

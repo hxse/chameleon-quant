@@ -17,6 +17,8 @@ dependencies = [
     "typer>=0.15.1",
     "niquests>=3.12.1",
     "pandas-ta",
+    "fastapi>=0.115.6",
+    "uvicorn>=0.34.0",
 ]
 
 
