@@ -171,7 +171,9 @@ def callback(_p, strategy, config_path, csv_dir):
         run_trade_api(exchange, strategy_params, df, result, fig)
 
 
-def loop_time(zone=zone, delay=5, config_path="src/strategy/config", csv_dir="src/csv"):
+def loop_time(
+    zone=zone, delay=10, config_path="src/strategy/config", csv_dir="src/csv"
+):
     last_minute_5 = None
     last_minute_30 = None
     last_hour_1 = None

@@ -52,6 +52,8 @@ def connect_api(config, params):
 
     exchange = None
 
+    http_proxy = config[exchange_name]["proxy"].get("http", None)
+    https_proxy = config[exchange_name]["proxy"].get("https", None)
     if exchange_name == "binance":
         exchange = ccxt.binance(
             {
@@ -59,8 +61,8 @@ def connect_api(config, params):
                 "secret": secret,
                 "options": {"defaultType": _type},
                 "proxies": {
-                    "http": config[exchange_name].get("http", None),
-                    "https": config[exchange_name].get("https", None),
+                    "http": http_proxy,
+                    "https": https_proxy,
                 },
             }
         )
