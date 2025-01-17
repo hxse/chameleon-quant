@@ -213,18 +213,6 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
             fig=fig,
         )
 
-    if 1:
-        push_telegram_channel(
-            config_path,
-            data={
-                "exchange_name": exchange_name,
-                "symbol": symbol,
-                "price": price,
-                "mode": "short_close",
-            },
-            fig=fig,
-        )
-
 
 def callback(_p, strategy, config_path, csv_dir):
     res = run_strategy(_p, strategy, config_path, csv_dir)
@@ -259,7 +247,7 @@ def loop_time(
         now = datetime.datetime.now(zone)
 
         if (
-            now.second >= delay and now.minute % 1 == 0 and last_minute_5 != now.minute
+            now.second >= delay and now.minute % 5 == 0 and last_minute_5 != now.minute
         ):  # 测试时改成1, 测试完了改成5
             last_minute_5 = now.minute
             print(now, "last_minute_5")
