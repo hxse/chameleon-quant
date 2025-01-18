@@ -9,6 +9,7 @@ services:
 
     volumes:
       - ~/chameleon-quant/csv:/app/src/csv
+      - ~/chameleon-quant/fig_data:/app/src/fig_data
       - ~/chameleon-quant/strategy:/app/src/strategy
 
     environment:
