@@ -408,7 +408,7 @@ def create_x_range(fig, df, line_figs=[]):
         fig.y_range.start = min - y_pad;
         fig.y_range.end = max + y_pad;
 
-        let x_pad = 3 // parseInt(index.length) * 0.05
+        let x_pad = 5 // parseInt(index.length) * 0.05
         if (start < -x_pad) {
             cb_obj.start = -x_pad
         }

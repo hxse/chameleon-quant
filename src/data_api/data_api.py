@@ -182,7 +182,7 @@ def get_data_wapper(
     if count_mode:
         if len(csv_df) >= count:
             csv_df = handle_data(config, csv_df, count_mode, strategy_params)
-            return [csv_df, None]
+            return [csv_df, None, csv_path]
 
         if not exchange:
             exchange = test_connect_api(config, strategy_params)
