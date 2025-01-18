@@ -5,7 +5,29 @@ from bokeh.io import export_png
 from pathlib import Path
 
 
-def push_telegram_channel(config_path, data, fig=None, send_html=False):
+def get_fig_path(csv_path, dir_name="fig_data"):
+    """
+    根据csv_path拼接fig_path
+    """
+    fig_path = Path(
+        *[*Path(csv_path).parts[:-5], dir_name, *[*Path(csv_path).parts[-4:]]]
+    )
+    return fig_path.parent / (fig_path.stem + ".html")
+
+
+def save_fig_file(fig, config_path, csv_path):
+    if csv_path:
+        fig_path = get_fig_path(csv_path)
+        fig_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        fig_path = (Path(config_path).parent) / "fig.html"
+
+    save(fig, fig_path)
+    print("html文件已存档", fig_path)
+    return fig_path
+
+
+def push_telegram_channel(config_path, data, fig=None, fig_path="", send_html=False):
     with open(config_path, "r", encoding="utf-8") as file:
         config = json.load(file)
 
@@ -18,10 +40,6 @@ def push_telegram_channel(config_path, data, fig=None, send_html=False):
     url = f"https://api.telegram.org/bot{tg_bot_token}/sendMessage?chat_id={tg_channel_id}&text={data}"
 
     res = niquests.get(url)
-
-    fig_path = (Path(config_path).parent) / "fig.html"
-    save(fig, fig_path)
-    print("html文件已存档", fig_path)
 
     if send_html:
         with open(fig_path, "rb") as f:

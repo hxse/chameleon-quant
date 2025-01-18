@@ -171,13 +171,13 @@ def get_data_wapper(
     )
     period = strategy_params["period"]
     count = strategy_params["count"]
-    file_name = f"{csv_dir}/{symbol.replace('/', '_')}/{_type} {_mode}/{period}/{start_date.replace(':', '_')}.csv"
+    csv_path = f"{csv_dir}/{symbol.replace('/', '_')}/{_type} {_mode}/{period}/{start_date.replace(':', '_')}.csv"
 
-    csv_df = load_csv(file_name)
+    csv_df = load_csv(csv_path)
     print(f"load csv: {len(csv_df)}")
 
     config = load_config(config_path)
-    print(file_name)
+    print(csv_path)
 
     if count_mode:
         if len(csv_df) >= count:
@@ -195,10 +195,10 @@ def get_data_wapper(
             count=count,
             ohlcv_df=csv_df,
         )
-        save_csv(file_name, ohlcv_df)
+        save_csv(csv_path, ohlcv_df)
 
         ohlcv_df = handle_data(config, ohlcv_df, count_mode, strategy_params)
-        return [ohlcv_df, exchange]
+        return [ohlcv_df, exchange, csv_path]
     else:
         if not exchange:
             exchange = test_connect_api(config, strategy_params)
@@ -210,10 +210,10 @@ def get_data_wapper(
             period=period,
             ohlcv_df=csv_df,
         )
-        save_csv(file_name, ohlcv_df)
+        save_csv(csv_path, ohlcv_df)
 
         ohlcv_df = handle_data(config, ohlcv_df, count_mode, strategy_params)
-        return [ohlcv_df, exchange]
+        return [ohlcv_df, exchange, csv_path]
 
 
 def split_data(df, ratio=0.3, copy=True):

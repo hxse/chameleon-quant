@@ -1,5 +1,6 @@
 **/config.json
 **/csv/*
+**/fig_data/*
 **/strategy/*
 
 # Exclude the project virtual environment from image builds

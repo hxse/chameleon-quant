@@ -12,7 +12,7 @@ sys.path.append("src")
 from data_api.data_api import get_data_wapper
 from backtest.backtest_framework import backtest_wapper
 from trade_api.trade_api import trade_api_wapper, get_ticker
-from telegram_bot.telegram_bot import push_telegram_channel
+from telegram_bot.telegram_bot import push_telegram_channel, save_fig_file
 
 time_arr = [{"name": "3s", "time": 3}]
 
@@ -53,7 +53,7 @@ def run_strategy(signal_time, strategy, config_path, csv_dir):
             )
 
             start_time = time.time()
-            [df, exchange] = get_data_wapper(
+            [df, exchange, csv_path] = get_data_wapper(
                 strategy_params=_s.strategy_params,
                 count_mode=count_mode,
                 exchange=exchange,
@@ -63,7 +63,7 @@ def run_strategy(signal_time, strategy, config_path, csv_dir):
             print("---get data %s second ---" % (time.time() - start_time))
 
             start_time = time.time()
-            [exchange, df, result, fig, _] = backtest_wapper(
+            [exchange, df, result, fig, _study] = backtest_wapper(
                 df,
                 strategy=_s.strategy,
                 strategy_params=_s.strategy_params,
@@ -74,10 +74,10 @@ def run_strategy(signal_time, strategy, config_path, csv_dir):
             print("---run strategy %s second ---" % (time.time() - start_time))
 
             exchange_dict[get_exchange_name(_name, account, period)] = exchange
-            return [exchange, _s.strategy_params, df, result, fig, _]
+            return [exchange, _s.strategy_params, df, result, fig, _study, csv_path]
 
 
-def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
+def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_path):
     exchange_name = strategy_params["exchange_name"]
     symbol = strategy_params["symbol"]
 
@@ -134,6 +134,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "mode": "open",
             },
             fig=fig,
+            fig_path=fig_path,
         )
     if df.iloc[-1]["short_status"] == 1:
         trade_api_wapper(
@@ -169,6 +170,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "mode": "open",
             },
             fig=fig,
+            fig_path=fig_path,
         )
     if df.iloc[-1]["long_status"] == 0:
         trade_api_wapper(
@@ -190,6 +192,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "mode": "long_close",
             },
             fig=fig,
+            fig_path=fig_path,
         )
     if df.iloc[-1]["short_status"] == 0:
         trade_api_wapper(
@@ -211,14 +214,16 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path):
                 "mode": "short_close",
             },
             fig=fig,
+            fig_path=fig_path,
         )
 
 
 def callback(_p, strategy, config_path, csv_dir):
     res = run_strategy(_p, strategy, config_path, csv_dir)
     if res is not None:
-        [exchange, strategy_params, df, result, fig, _] = res
-        run_trade_api(exchange, strategy_params, df, result, fig, config_path)
+        [exchange, strategy_params, df, result, fig, _, csv_path] = res
+        fig_path = save_fig_file(fig, config_path, csv_path)
+        run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_path)
 
 
 def loop_time(
