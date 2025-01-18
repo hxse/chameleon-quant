@@ -25,7 +25,6 @@ COPY --from=builder --chown=app:app /app /app
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
-ENV BOKEH_PY_LOG_LEVEL="critical"
 
 # Run the FastAPI application by default
 # CMD ["fastapi", "dev", "--host", "0.0.0.0", "/app/src/uv_docker_example"]
