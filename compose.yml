@@ -4,8 +4,8 @@ services:
     build: .
 
     # Host the FastAPI application on port 8000
-    ports:
-      - "2197:2197"
+    # ports:
+    #   - "2197:2197"
 
     volumes:
       - ~/chameleon-quant/csv:/app/src/csv
