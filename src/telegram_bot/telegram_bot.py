@@ -3,6 +3,20 @@ import json
 from bokeh.plotting import figure, output_file, save
 from bokeh.io import export_png
 from pathlib import Path
+import datetime
+import time
+
+
+def time_decorate(name):
+    def time_decorator(func):
+        def wrapper_function(*args, **kwargs):
+            start_time = time.time()
+            func(*args, **kwargs)
+            print(f"{name} {time.time() - start_time}")
+
+        return wrapper_function
+
+    return time_decorator
 
 
 def get_fig_path(csv_path, dir_name="fig_data"):
@@ -15,6 +29,7 @@ def get_fig_path(csv_path, dir_name="fig_data"):
     return fig_path.parent / (fig_path.stem + ".html")
 
 
+@time_decorate("save fig done ")
 def save_fig_file(fig, config_path, csv_path):
     if csv_path:
         fig_path = get_fig_path(csv_path)
