@@ -9,9 +9,9 @@ from pathlib import Path
 
 if sys.platform.startswith("linux"):
     print("Linux")
-    file_path = "/root/chameleon-quant/strategy/config.json"
+    config_path = "/root/chameleon-quant/strategy/config.json"
 elif sys.platform.startswith("win"):
-    file_path = "src/strategy/config.json"
+    config_path = "src/strategy/config.json"
     print("Windows")
 elif sys.platform.startswith("darwin"):
     print("macOS")
@@ -21,9 +21,15 @@ else:
 app = FastAPI()
 
 
-@app.get("/fig_html/", response_class=HTMLResponse)
-async def read_items():
-    with open(Path(file_path).parent / "fig.html", "rb") as f:
+@app.get("/fig_html/{symbol}/{mode}/{period}/{file_name}", response_class=HTMLResponse)
+async def read_items(symbol: str, mode: str, period: str, file_name: str):
+    file_path = (
+        Path(config_path).parent.parent
+        / "fig_data"
+        / f"{symbol}/{mode}/{period}/{file_name}"
+    )
+    print(file_path)
+    with open(file_path, "rb") as f:
         data = f.read()
     return data
 
@@ -33,6 +39,6 @@ def main():
     return {"Hello": "World"}
 
 
-def run():
-    print("hello")
+if __name__ == "__main__":
+    print("run fast_api")
     uvicorn.run("fast_api_demo:app", host="0.0.0.0", port=2197)

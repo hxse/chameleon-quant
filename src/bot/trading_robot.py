@@ -287,6 +287,7 @@ def loop_time(
 
 
 def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
+    print("run trading_robot")
     loop_time(config_path=config_path, csv_dir=csv_dir)
 
 
