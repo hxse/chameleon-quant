@@ -53,20 +53,23 @@ def backtest_wapper(
         )
         return [exchange, df, result, fig, None]
     else:
+        train_df = split_data(df, ratio=strategy_params.get("ratio", 0.3), copy=True)
+        test_index_dict = get_test_index(df, train_df)
+
         study = optuna.create_study(
             # storage="sqlite:///optuna_db/db.sqlite3",
             # study_name="test",
         )
         func = optuna_wrapper(
-            df, strategy, strategy_params=strategy_params, optuna_params=optuna_params
+            train_df,
+            strategy,
+            strategy_params=strategy_params,
+            optuna_params=optuna_params,
         )
         study.optimize(func, n_trials=strategy_params.get("n_trials", 50))
         print(f"Best value: {study.best_value} (params: {study.best_params})")
 
         strategy_params = {**strategy_params, **study.best_params}
-
-        train_df = split_data(df, ratio=strategy_params.get("ratio", 0.3), copy=True)
-        test_index_dict = get_test_index(df, train_df)
 
         strategy(df, strategy_params)
 

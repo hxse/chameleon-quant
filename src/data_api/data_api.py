@@ -10,7 +10,7 @@ from trade_api.trade_api import (
     get_balance,
 )
 
-period_dict = {"5m": 5, "1h": 60}
+period_dict = {"5m": 5, "15m": 15, "30m": 30, "1h": 60, "4h": 240, "1d": 1440}
 
 
 def _get_data(exchange, ohlcv_df, symbol, period, count, limit):
