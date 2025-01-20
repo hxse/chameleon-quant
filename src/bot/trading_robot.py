@@ -38,44 +38,41 @@ def get_exchange_name(_name, account, _p):
 exchange_dict = {}
 
 
-def run_strategy(signal_time, strategy, config_path, csv_dir):
+def run_strategy(signal_time, _name, _s, config_path, csv_dir):
     # count_mode = True
     count_mode = False
 
-    for [_name, _s] in strategy.strategy_arr:
-        period = _s.strategy_params["period"]
-        account = _s.strategy_params["account"]
+    period = _s.strategy_params["period"]
+    account = _s.strategy_params["account"]
 
-        if signal_time == period and _s.strategy_params.get("enable_bot", False):
-            print(f"run {period} {_name} {_s}")
+    if signal_time == period and _s.strategy_params.get("enable_bot", False):
+        print(f"run {period} {_name} {_s}")
 
-            exchange = exchange_dict.get(
-                get_exchange_name(_name, account, period), None
-            )
+        exchange = exchange_dict.get(get_exchange_name(_name, account, period), None)
 
-            start_time = time.time()
-            [df, exchange, csv_path] = get_data_wapper(
-                strategy_params=_s.strategy_params,
-                count_mode=count_mode,
-                exchange=exchange,
-                config_path=config_path,
-                csv_dir=csv_dir,
-            )
-            print("---get data %s second ---" % (time.time() - start_time))
+        start_time = time.time()
+        [df, exchange, csv_path] = get_data_wapper(
+            strategy_params=_s.strategy_params,
+            count_mode=count_mode,
+            exchange=exchange,
+            config_path=config_path,
+            csv_dir=csv_dir,
+        )
+        print("---get data %s second ---" % (time.time() - start_time))
 
-            start_time = time.time()
-            [exchange, df, result, fig, _study] = backtest_wapper(
-                df,
-                strategy=_s.strategy,
-                strategy_params=_s.strategy_params,
-                optimize_mode=False,
-                count_mode=count_mode,
-                exchange=exchange,
-            )
-            print("---run strategy %s second ---" % (time.time() - start_time))
+        start_time = time.time()
+        [exchange, df, result, fig, _study] = backtest_wapper(
+            df,
+            strategy=_s.strategy,
+            strategy_params=_s.strategy_params,
+            optimize_mode=False,
+            count_mode=count_mode,
+            exchange=exchange,
+        )
+        print("---run strategy %s second ---" % (time.time() - start_time))
 
-            exchange_dict[get_exchange_name(_name, account, period)] = exchange
-            return [exchange, _s.strategy_params, df, result, fig, _study, csv_path]
+        exchange_dict[get_exchange_name(_name, account, period)] = exchange
+        return [exchange, _s.strategy_params, df, result, fig, _study, csv_path]
 
 
 def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_path):
@@ -220,11 +217,14 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
 
 
 def callback(_p, strategy, config_path, csv_dir):
-    res = run_strategy(_p, strategy, config_path, csv_dir)
-    if res is not None:
-        [exchange, strategy_params, df, result, fig, _, csv_path] = res
-        fig_path = save_fig_file(fig, config_path, csv_path)
-        run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_path)
+    for [_name, _s] in strategy.strategy_arr:
+        res = run_strategy(_p, _name, _s, config_path, csv_dir)
+        if res is not None:
+            [exchange, strategy_params, df, result, fig, _, csv_path] = res
+            fig_path = save_fig_file(fig, config_path, csv_path)
+            run_trade_api(
+                exchange, strategy_params, df, result, fig, config_path, fig_path
+            )
 
 
 def loop_time(
