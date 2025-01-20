@@ -172,8 +172,8 @@ def add_hover(fig, df):
             ("low", "@low"),
             ("close", "@close"),
             ("atr", "@atr"),
-            ("long_total", "@long_total"),
-            ("short_total", "@short_total"),
+            ("merge_total", "@merge_total"),
+            ("merge_diff", "@merge_diff"),
         ],
         formatters={"@date": "datetime"},
         mode="vline",
@@ -431,7 +431,7 @@ def create_x_range(fig, df, line_figs=[]):
         }
 
         console.log(cb_obj.start,cb_obj.end)
-    },100); //ms
+    },150); //ms
 
     """,
     )

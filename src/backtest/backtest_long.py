@@ -53,13 +53,13 @@ def run_long(
             pole_idx = idx
         # atr_tsl 没有limit模式, 优先级最低, 所以放上面, 在后面放atr_tp, atr_sl, 从而覆盖long_price_list值
         if atr_tsl != 0:
-            tsl = close_list[pole_idx] - atr_list[idx] * atr_tsl
+            tsl = close - atr_list[idx] * atr_tsl
             tsl = (
                 tsl
-                if np.isnan(tsl_list[idx - 1]) or tsl > tsl_list[idx - 1]
+                if np.isnan(tsl_list[idx - 1]) or tsl >= tsl_list[idx - 1]
                 else tsl_list[idx - 1]
             )
-            if close < tsl and status != 1:
+            if close <= tsl and status != 1:
                 status = 0
                 last_idx = -1
                 price_list[idx] = close

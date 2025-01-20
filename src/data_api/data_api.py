@@ -13,10 +13,15 @@ from trade_api.trade_api import (
 period_dict = {"5m": 5, "15m": 15, "30m": 30, "1h": 60, "4h": 240, "1d": 1440}
 
 
+def fetch_ohlcv(exchange, symbol, period, since, limit):
+    new_ohlcv = exchange.fetch_ohlcv(symbol, period, since=since, limit=limit)
+    return new_ohlcv[:-1]
+
+
 def _get_data(exchange, ohlcv_df, symbol, period, count, limit):
     print(f"get data: {limit} exist: {len(ohlcv_df)} count: {count}")
     from_ts = int(ohlcv_df.iloc[-1][0])
-    new_ohlcv = exchange.fetch_ohlcv(symbol, period, since=from_ts, limit=limit)
+    new_ohlcv = fetch_ohlcv(exchange, symbol, period, since=from_ts, limit=limit)
     new_ohlcv_df = pd.DataFrame(new_ohlcv)
     new_ohlcv_df.drop(index=new_ohlcv_df.index[0], axis=0, inplace=True)
     ohlcv_df = pd.concat(
@@ -33,7 +38,7 @@ def get_data_count(exchange, symbol, start_date, period, count, ohlcv_df=[], wai
 
     if len(ohlcv_df) == 0:
         print(f"get data: {limit} exist: 0 count: {count}")
-        ohlcv = exchange.fetch_ohlcv(symbol, period, since=from_ts, limit=limit)
+        ohlcv = fetch_ohlcv(exchange, symbol, period, since=from_ts, limit=limit)
         ohlcv_df = pd.DataFrame(ohlcv)
         time.sleep(wait)
 
@@ -75,7 +80,7 @@ def get_data_latest(
     if len(ohlcv_df) == 0:
         print(f"get data: {limit} exist: 0 count: latest")
         from_ts = exchange.parse8601(start_date)
-        ohlcv = exchange.fetch_ohlcv(symbol, period, since=from_ts, limit=limit)
+        ohlcv = fetch_ohlcv(exchange, symbol, period, since=from_ts, limit=limit)
         ohlcv_df = pd.DataFrame(ohlcv)
         time.sleep(wait)
 

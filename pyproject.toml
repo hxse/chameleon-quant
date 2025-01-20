@@ -16,11 +16,14 @@ dependencies = [
     "optuna-dashboard>=0.17.0",
     "typer>=0.15.1",
     "niquests>=3.12.1",
-    "pandas-ta",
     "fastapi>=0.115.6",
     "uvicorn>=0.34.0",
+    "pandas-ta",
 ]
 
 
 [tool.pdm]
+
+[tool.uv.sources]
+pandas-ta = { git = "https://github.com/twopirllc/pandas-ta.git", rev = "development" }
 
