@@ -182,7 +182,6 @@ def get_data_wapper(
     print(f"load csv: {len(csv_df)}")
 
     config = load_config(config_path)
-    print(csv_path)
 
     if count_mode:
         if len(csv_df) >= count:
