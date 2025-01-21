@@ -17,11 +17,10 @@ def optuna_wrapper(df, strategy, strategy_params, optuna_params):
                 _params[k] = trial.suggest_categorical(k, v["array"])
 
         _params = {**strategy_params, **_params}
-        train_df = split_data(df, ratio=_params.get("ratio", 0.3), copy=True)
-        strategy(train_df, _params)
+        strategy(df, _params)
 
         return -run_backtest_warp(
-            train_df,
+            df,
             atr_sl=_params.get("atr_sl", 0),
             atr_tp=_params.get("atr_tp", 0),
             atr_tsl=_params.get("atr_tsl", 0),

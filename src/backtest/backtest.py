@@ -226,4 +226,5 @@ def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=
         "total": df.iloc[-1]["merge_total"],
         "one_side": long_count == 0 or short_count == 0,
         "repeat_count": repeat_count,
+        "candle_count": len(df),
     }
