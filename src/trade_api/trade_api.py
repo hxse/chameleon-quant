@@ -192,37 +192,48 @@ def trade_api_wapper(
     leverage:int 杠杆没必要在机器人上设置, 自己在客户端调整就行, 设置为1就忽略了
     mode:str 如果为open, 开仓和止盈止损, close模式则平仓, cancel模式则为撤单
     """
+    try:
+        exchange_name = strategy_params["exchange_name"]
+        symbol = strategy_params["symbol"]
 
-    exchange_name = strategy_params["exchange_name"]
-    symbol = strategy_params["symbol"]
+        if mode == "open":
+            side_opposite = "sell" if side == "buy" else "buy"
+            # price = get_ticker(exchange, symbol)
+            # stopLossParams = price - 500 if side == "buy" else price + 500
+            # takeProfitPrice = price + 500 if side == "buy" else price - 500
 
-    if mode == "open":
-        side_opposite = "sell" if side == "buy" else "buy"
-        # price = get_ticker(exchange, symbol)
-        # stopLossParams = price - 500 if side == "buy" else price + 500
-        # takeProfitPrice = price + 500 if side == "buy" else price - 500
+            if price != None:
+                amount = get_amount(
+                    exchange_name, symbol, price, strategy_params["usd"], leverage
+                )  # order["info"]["origQty"],
+                order = create_order(exchange, symbol, side, amount)
+                message = f"status {order['status']} amount {amount} price {price}"
+                print(message)
+                return message
 
-        if price != None:
-            amount = get_amount(
-                exchange_name, symbol, price, strategy_params["usd"], leverage
-            )  # order["info"]["origQty"],
-            order = create_order(exchange, symbol, side, amount)
-            print(order["status"], amount, price, order["info"]["origQty"])
+            if exchange_name == "binance":
+                if stopLossParams != None:
+                    order = stop_loss_order(
+                        exchange, symbol, side_opposite, amount, stopLossParams
+                    )
+                    message = f"status {order['status']} amount {amount} price {price}"
+                    print(message)
+                    return message
+                if takeProfitPrice != None:
+                    order = take_profit_order(
+                        exchange, symbol, side_opposite, amount, takeProfitPrice
+                    )
+                    message = f"status {order['status']} amount {amount} price {price}"
+                    print(message)
+                    return message
 
-        if exchange_name == "binance":
-            if stopLossParams != None:
-                order = stop_loss_order(
-                    exchange, symbol, side_opposite, amount, stopLossParams
-                )
-                print(order["status"])
-            if takeProfitPrice != None:
-                order = take_profit_order(
-                    exchange, symbol, side_opposite, amount, takeProfitPrice
-                )
-                print(order["status"])
+        if mode == "close":
+            close_position_all(exchange, symbol)
 
-    if mode == "close":
-        close_position_all(exchange, symbol)
+        if mode == "cancel":
+            cancel_order_all(exchange, symbol)
 
-    if mode == "cancel":
-        cancel_order_all(exchange, symbol)
+    except Exception as e:
+        error = f"{type(e).__name__} {str(e)}"
+        print("trade_api_wapper", error)
+        return error

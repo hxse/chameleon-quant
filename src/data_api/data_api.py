@@ -133,9 +133,9 @@ def test_connect_api(config, strategy_params):
     print(balance_obj["total"])  # 总资产数量
 
     print("USDT", balance_obj.get("USDT", {}))
-    print("BTC", balance_obj.get("BTC", {}))
-    print("ETH", balance_obj.get("ETH", {}))
-    print("DOGE", balance_obj.get("DOGE", {}))
+    # print("BTC", balance_obj.get("BTC", {}))
+    # print("ETH", balance_obj.get("ETH", {}))
+    # print("DOGE", balance_obj.get("DOGE", {}))
     return exchange
 
 

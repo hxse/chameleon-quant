@@ -43,31 +43,37 @@ def save_fig_file(fig, config_path, csv_path):
 
 
 def push_telegram_channel(config_path, data, fig=None, fig_path="", send_html=False):
-    with open(config_path, "r", encoding="utf-8") as file:
-        config = json.load(file)
+    try:
+        with open(config_path, "r", encoding="utf-8") as file:
+            config = json.load(file)
 
-    tg_bot_token = config.get("tg_bot_token", None)
-    tg_channel_id = config.get("tg_channel_id", None)
-    if not tg_bot_token or not tg_channel_id:
-        print("not detected tg_bot_token or tg_channel_id")
-        return
+        tg_bot_token = config.get("tg_bot_token", None)
+        tg_channel_id = config.get("tg_channel_id", None)
+        if not tg_bot_token or not tg_channel_id:
+            print("not detected tg_bot_token or tg_channel_id")
+            return
 
-    url = f"https://api.telegram.org/bot{tg_bot_token}/sendMessage?chat_id={tg_channel_id}&text={data}"
+        url = f"https://api.telegram.org/bot{tg_bot_token}/sendMessage?chat_id={tg_channel_id}&text={data}"
 
-    res = niquests.get(url)
+        res = niquests.get(url)
 
-    if send_html:
-        with open(fig_path, "rb") as f:
-            file_data = f.read()
+        if send_html:
+            with open(fig_path, "rb") as f:
+                file_data = f.read()
 
-        url = f"https://api.telegram.org/bot{tg_bot_token}/sendDocument"
-        res = niquests.post(
-            url,
-            data={
-                "chat_id": tg_channel_id,
-                "parse_mode": "HTML",
-                "caption": "This is my file",
-            },
-            files={"document": ("fig.html", file_data)},
-        )
-        print(res)
+            url = f"https://api.telegram.org/bot{tg_bot_token}/sendDocument"
+            res = niquests.post(
+                url,
+                data={
+                    "chat_id": tg_channel_id,
+                    "parse_mode": "HTML",
+                    "caption": "This is my file",
+                },
+                files={"document": ("fig.html", file_data)},
+            )
+            print(res)
+
+    except Exception as e:
+        error = f"{type(e).__name__} {str(e)}"
+        print("push_telegram_channel", error)
+        return error

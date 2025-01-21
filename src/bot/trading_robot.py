@@ -58,7 +58,7 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
             config_path=config_path,
             csv_dir=csv_dir,
         )
-        print("---get data %s second ---" % (time.time() - start_time))
+        print("get data %s second" % (time.time() - start_time))
 
         start_time = time.time()
         [exchange, df, result, fig, _study] = backtest_wapper(
@@ -69,7 +69,7 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
             count_mode=count_mode,
             exchange=exchange,
         )
-        print("---run strategy %s second ---" % (time.time() - start_time))
+        print("run strategy %s second" % (time.time() - start_time))
 
         exchange_dict[get_exchange_name(_name, account, period)] = exchange
         return [exchange, _s.strategy_params, df, result, fig, _study, csv_path]
@@ -89,17 +89,14 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
     short_sl = None if np.isnan(df.iloc[-1]["short_sl"]) else df.iloc[-1]["short_sl"]
     short_tsl = None if np.isnan(df.iloc[-1]["short_tsl"]) else df.iloc[-1]["short_tsl"]
 
-    print("long_status", df.iloc[-1]["long_status"], price, long_tp, long_sl, long_tsl)
     print(
-        "short_status",
-        df.iloc[-1]["short_status"],
-        price,
-        short_tp,
-        short_sl,
-        short_tsl,
+        f"---- long_status {df.iloc[-1]['long_status']} price {price} long_tp {long_tp} long_sl {long_sl} long_tsl {long_tsl}"
+    )
+    print(
+        f"---- short_status {df.iloc[-1]['short_status']} price {price} short_tp {short_tp} short_sl {short_sl} short_tsl {short_tsl}"
     )
     if df.iloc[-1]["long_status"] == 1:
-        trade_api_wapper(
+        message = trade_api_wapper(
             exchange,
             strategy_params,
             side=None,
@@ -109,7 +106,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
             stopLossParams=None,
             mode="cancel",
         )
-        trade_api_wapper(
+        message = trade_api_wapper(
             exchange,
             strategy_params,
             "buy",
@@ -130,12 +127,13 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
                 "long_sl": long_sl,
                 "long_tsl": long_tsl,
                 "mode": "open",
+                "message": message,
             },
             fig=fig,
             fig_path=fig_path,
         )
     if df.iloc[-1]["short_status"] == 1:
-        trade_api_wapper(
+        message = trade_api_wapper(
             exchange,
             strategy_params,
             side=None,
@@ -145,7 +143,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
             stopLossParams=None,
             mode="cancel",
         )
-        trade_api_wapper(
+        message = trade_api_wapper(
             exchange,
             strategy_params,
             "sell",
@@ -166,12 +164,13 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
                 "short_sl": short_sl,
                 "short_tsl": short_tsl,
                 "mode": "open",
+                "message": message,
             },
             fig=fig,
             fig_path=fig_path,
         )
     if df.iloc[-1]["long_status"] == 0:
-        trade_api_wapper(
+        message = trade_api_wapper(
             exchange,
             strategy_params,
             side=None,
@@ -188,12 +187,13 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
                 "symbol": symbol,
                 "price": price,
                 "mode": "long_close",
+                "message": message,
             },
             fig=fig,
             fig_path=fig_path,
         )
     if df.iloc[-1]["short_status"] == 0:
-        trade_api_wapper(
+        message = trade_api_wapper(
             exchange,
             strategy_params,
             side=None,
@@ -210,6 +210,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
                 "symbol": symbol,
                 "price": price,
                 "mode": "short_close",
+                "message": message,
             },
             fig=fig,
             fig_path=fig_path,
