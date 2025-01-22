@@ -10,6 +10,7 @@ amount_dict = {
         "ETH/USDT": {"minimum": 0.006, "round": 3},
         "DOGE/USDT": {"minimum": 14, "round": 0},
         "XRP/USDT": {"minimum": 1.8, "round": 1},
+        "TRUMP/USDT": {"minimum": 0.13, "round": 2},
     }
 }
 
@@ -105,7 +106,11 @@ def get_ticker(exchange, symbol):
     return price
 
 
-def get_amount(exchange_name, symbol, price, size, leverage):
+def get_amount(exchange, exchange_name, symbol, price, size, leverage):
+    # market = exchange.market(symbol)
+    # cost_min = market["limits"]["cost"]["min"]
+    # amount_min = market["limits"]["amount"]["min"]
+
     amount = size * leverage / price
 
     minimum = amount_dict[exchange_name][symbol]["minimum"]
@@ -199,15 +204,18 @@ def trade_api_wapper(
         if mode == "open":
             side_opposite = "sell" if side == "buy" else "buy"
             # price = get_ticker(exchange, symbol)
-            # stopLossParams = price - 500 if side == "buy" else price + 500
-            # takeProfitPrice = price + 500 if side == "buy" else price - 500
 
             if price != None:
                 amount = get_amount(
-                    exchange_name, symbol, price, strategy_params["usd"], leverage
+                    exchange,
+                    exchange_name,
+                    symbol,
+                    price,
+                    strategy_params["usd"],
+                    leverage,
                 )  # order["info"]["origQty"],
                 order = create_order(exchange, symbol, side, amount)
-                message = f"status {order['status']} amount {amount} price {price}"
+                message = f"status: {order['status']} amount: {amount} price: {price}"
                 print(message)
                 return message
 
@@ -235,5 +243,5 @@ def trade_api_wapper(
 
     except Exception as e:
         error = f"{type(e).__name__} {str(e)}"
-        print("trade_api_wapper", error)
+        print("trade_api_wapper:", error)
         return error

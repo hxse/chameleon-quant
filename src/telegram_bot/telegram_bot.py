@@ -75,5 +75,5 @@ def push_telegram_channel(config_path, data, fig=None, fig_path="", send_html=Fa
 
     except Exception as e:
         error = f"{type(e).__name__} {str(e)}"
-        print("push_telegram_channel", error)
+        print("push_telegram_channel:", error)
         return error

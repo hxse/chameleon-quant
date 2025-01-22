@@ -234,7 +234,7 @@ wheels = [
 
 [[package]]
 name = "ccxt"
-version = "4.4.48"
+version = "4.4.50"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiodns" },
@@ -246,9 +246,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/58/54/ddab4a3eef3f324b0c01d4c6ebfa52e9983885352fce3d5c12ff36ca9ac7/ccxt-4.4.48.tar.gz", hash = "sha256:92bcc5e27c405466e989d3293897146ad61b01e2951ca84f12affcad14117037", size = 5264689 }
+sdist = { url = "https://files.pythonhosted.org/packages/a2/47/378d9180d66cc5a0290e90f05a45dacf9da0dfd93d8776376e667dda6711/ccxt-4.4.50.tar.gz", hash = "sha256:79d28a50c3aea21378fcbf054a95d1fca46cea50be9b1f6d9e67eee1fdb83ffe", size = 5288838 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/f9/5c7ff58f81f7cdb0277c2e6e287fe784ebd0542bfa0ae9e2ab2dca974619/ccxt-4.4.48-py2.py3-none-any.whl", hash = "sha256:1a9079837e5c08e43b49dd0242dd85301041f4e17479b0c6df58b219e3bb4168", size = 5636867 },
+    { url = "https://files.pythonhosted.org/packages/b6/ce/d6a205a5ce99d567846fad48e8f6e1dbdc4baabe46b69194e82b502e5fec/ccxt-4.4.50-py2.py3-none-any.whl", hash = "sha256:4f2ce2f70fa7a41416626dd3b90288900fd9d5fa892989abd9a21e784058a5cb", size = 5659125 },
 ]
 
 [[package]]
@@ -342,7 +342,7 @@ dependencies = [
 requires-dist = [
     { name = "bokeh", specifier = ">=3.6.2" },
     { name = "bokeh-sampledata", specifier = ">=2024.2" },
-    { name = "ccxt", specifier = ">=4.4.44" },
+    { name = "ccxt", specifier = ">=4.4.50" },
     { name = "fastapi", specifier = ">=0.115.6" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "niquests", specifier = ">=3.12.1" },

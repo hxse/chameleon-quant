@@ -18,14 +18,22 @@ with open(file_path, "r", encoding="utf-8") as file:
     config = json.load(file)
 
 
-http_proxy = config["binance"]["proxy"]["http"]
-https_proxy = config["binance"]["proxy"]["https"]
+http_proxy = config["binance"]["proxy"].get("http", None)
+https_proxy = config["binance"]["proxy"].get("https", None)
 
 proxies = {
     "http": http_proxy,
     "https": https_proxy,
 }
-url = "https://api.binance.com/api/v3/exchangeInfo"
+
+api = "https://api.binance.com"
+
+
+def get_url(api):
+    return f"{api}/api/v3/exchangeInfo"
+
+
+url = get_url(api)
 
 r = niquests.get(url, proxies=proxies)
 print(r)

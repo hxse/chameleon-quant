@@ -15,7 +15,6 @@ from backtest.backtest_framework import backtest_wapper
 from trade_api.trade_api import trade_api_wapper, get_ticker
 from telegram_bot.telegram_bot import push_telegram_channel, save_fig_file
 
-time_arr = [{"name": "3s", "time": 3}]
 
 zone = datetime.timezone.utc
 zone = ZoneInfo("Asia/Shanghai")
