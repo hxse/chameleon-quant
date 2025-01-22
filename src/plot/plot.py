@@ -159,22 +159,24 @@ def add_hover(fig, df):
     close_line = fig.line(
         "index", "close", source=source, line_width=2, line_alpha=0, visible=True
     )
-
+    tooltips = [
+        ("y", "$y"),
+        ("index", "@index"),
+        ("date", "@date{%Y-%m-%d %H:%M:%S %z}"),
+        ("open", "@open"),
+        ("high", "@high"),
+        ("low", "@low"),
+        ("close", "@close"),
+        ("merge_diff", "@merge_diff"),
+        ("merge_total", "@merge_total"),
+    ]
+    for i in reversed(["rsi", "atr"]):
+        if i in df.columns:
+            tooltips.insert(7, (f"{i}", f"@{i}"))
     # hovertool 没有办法调整时区 https://github.com/bokeh/bokeh/issues/1135
     hover = HoverTool(
         renderers=[close_line],
-        tooltips=[
-            ("y", "$y"),
-            ("index", "@index"),
-            ("date", "@date{%Y-%m-%d %H:%M:%S %z}"),
-            ("open", "@open"),
-            ("high", "@high"),
-            ("low", "@low"),
-            ("close", "@close"),
-            ("atr", "@atr"),
-            ("merge_diff", "@merge_diff"),
-            ("merge_total", "@merge_total"),
-        ],
+        tooltips=tooltips,
         formatters={"@date": "datetime"},
         mode="vline",
         point_policy="follow_mouse",
@@ -373,7 +375,7 @@ def layout_plot(
     add_indicator(fig_first, df, plot_params=plot_params)
     add_hover(fig_first, df)
 
-    for i in fig_array[1:]:
+    for i in fig_array[:-1]:
         i.xaxis.visible = False
 
     _w = Span(dimension="width", line_dash="dashed", line_width=1)
