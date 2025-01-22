@@ -242,10 +242,36 @@ def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75
         source=source_dec,
     )
 
-    return fig
+    return [fig, ["high", "low"]]
 
 
 def line_plot(
+    df, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
+):
+    fig = figure(
+        sizing_mode="scale_width",
+        tools="xpan,xwheel_zoom,undo,redo,reset,save",  # crosshair
+        active_drag="xpan",
+        active_scroll="xwheel_zoom",
+        x_axis_type="datetime",
+        width=int(width * width_scale),
+        height=int(height * height_scale),
+    )
+    if "rsi" in df.columns:
+        fig.line(
+            "index",
+            "rsi",
+            source=df,
+            line_width=2,
+            line_alpha=1,
+            line_color="green",
+            visible=True,
+        )
+
+    return [fig, ["rsi"]]
+
+
+def backtest_plot(
     df, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
 ):
     fig = figure(
@@ -295,7 +321,7 @@ def line_plot(
             visible=True,
         )
 
-    return fig
+    return [fig, ["merge_total", "long_total", "short_total"]]
 
 
 def layout_plot(
@@ -306,33 +332,49 @@ def layout_plot(
     plot_params=None,
 ):
     fig_array = []
+    columns_array = []
     for i in plot_config:
         if not i["show"]:
             continue
         if i["name"] == "candle":
-            fig = candlestick_plot(
+            _f = candlestick_plot(
                 df,
                 width=width,
                 height=height,
                 height_scale=i["height_scale"],
             )
-        else:
-            fig = line_plot(
+            fig_array.append(_f[0])
+            columns_array.append(_f[1])
+        elif i["name"] == "backtest":
+            _f = backtest_plot(
                 df,
                 width=width,
                 height=height,
                 height_scale=i["height_scale"],
                 plot_params=plot_params,
             )
-        fig_array.append(fig)
+            fig_array.append(_f[0])
+            columns_array.append(_f[1])
+        else:
+            _f = line_plot(
+                df,
+                width=width,
+                height=height,
+                height_scale=i["height_scale"],
+                plot_params=plot_params,
+            )
+            fig_array.append(_f[0])
+            columns_array.append(_f[1])
 
     fig_first = fig_array[0]
-    x_range = create_x_range(fig_first, df, line_figs=fig_array[1:])
+    x_range = create_x_range(
+        fig_first, df, fig_array=fig_array, columns_array=columns_array
+    )
     add_indicator(fig_first, df, plot_params=plot_params)
     add_hover(fig_first, df)
 
-    if len(fig_array) > 1:
-        fig_first.xaxis.visible = False
+    for i in fig_array[1:]:
+        i.xaxis.visible = False
 
     _w = Span(dimension="width", line_dash="dashed", line_width=1)
     _h = Span(dimension="height", line_dash="dotted", line_width=1)
@@ -359,75 +401,73 @@ def layout_plot(
     return column(fig_array, sizing_mode="scale_width", width=width, height=height)
 
 
-def create_x_range(fig, df, line_figs=[]):
+def create_x_range(fig, df, fig_array=[], columns_array=[]):
     common_x_range = DataRange1d(bounds=None)
     source = ColumnDataSource(data=df)
     callback = CustomJS(
         args={
             "fig": fig,
             "source": source,
-            "line_figs": line_figs,
+            "fig_array": fig_array,
+            "columns_array": columns_array,
         },
         code="""
     clearTimeout(window._autoscale_timeout);
 
-    let index = source.data.index,
-    low = source.data.low,
-    high = source.data.high,
-    long_total = source.data.long_total,
-    short_total = source.data.short_total,
-    merge_total = source.data.merge_total,
-    start = cb_obj.start,
-    end = cb_obj.end,
-    min = Infinity,
-    max = -Infinity;
+    let index = source.data.index
+    let start_cb_x = cb_obj.start
+    let end_cb_x = cb_obj.end
 
-    for (let i = 0; i < index.length; ++i) {
-        if (start <= index[i] && index[i] <= end) {
-            max = Math.max(high[i], max);
-            min = Math.min(low[i], min);
-        }
-    }
     let _array=[]
-    for (let i = 0; i < line_figs.length; ++i) {
+    for (let i = 0; i < fig_array.length; ++i) {
         let _min = Infinity;
         let _max = -Infinity;
-        for (let i = 0; i < index.length; ++i) {
-            if (start <= index[i] && index[i] <= end) {
-                _max = Math.max(long_total[i], short_total[i], merge_total[i], _max);
-                _min = Math.min(long_total[i], short_total[i], merge_total[i], _min);
+        let c = columns_array[i]
+
+        if (1){
+            //两种写法
+            let _start=start_cb_x<0?0:parseInt(start_cb_x)
+            let _end=parseInt(end_cb_x)+1
+            let c_arr = c.map(i=>source.data[i].slice(_start,_end).filter(value => !isNaN(value)))
+            let c_arr_max = c_arr.map(i=>Math.max(...i))
+            let c_arr_min = c_arr.map(i=>Math.min(...i))
+            _array.push([Math.min(...c_arr_min), Math.max(...c_arr_max)])
+        }else{
+            for (let i = 0; i < index.length; ++i) {
+                if (start_cb_x <= index[i] && index[i] <= end_cb_x) {
+                    let _n=c.map(m=>source.data[m][i]).filter(value => !isNaN(value))
+                    _max = Math.max(..._n, _max);
+                    _min = Math.min(..._n, _min);
+                }
             }
+            _array.push([_min,_max])
         }
-        _array.push([_min,_max])
     }
 
-    let y_pad = (max - min) * 0.05;
 
     window._autoscale_timeout = setTimeout(function() {
 
-        fig.y_range.start = min - y_pad;
-        fig.y_range.end = max + y_pad;
+        // fig y scale
+         for (let i = 0; i < fig_array.length; ++i) {
+             let [_min,_max]=_array[i]
+             let y_pad = (_max - _min) * 0.05;
+             let y_range=fig_array[i].y_range
+             y_range.start = _min - y_pad;
+             y_range.end = _max + y_pad;
+         }
 
         let x_pad = 5 // parseInt(index.length) * 0.05
-        if (start < -x_pad) {
+        if (start_cb_x < -x_pad) {
             cb_obj.start = -x_pad
         }
 
-        if (end > index.length + x_pad) {
+        if (end_cb_x > index.length + x_pad) {
             cb_obj.end = index.length + x_pad
         }
 
-        if (end-start <= 2){
-            cb_obj.start = start - 1
-            cb_obj.end = end + 1
-        }
-
-        // line fig scale
-        for (let i = 0; i < line_figs.length; ++i) {
-            let [_min,_max]=_array[i]
-            let y_range=line_figs[i].y_range
-            y_range.start = _min - y_pad;
-            y_range.end = _max + y_pad;
+        if (end_cb_x-start_cb_x <= 2){
+            cb_obj.start = start_cb_x - 1
+            cb_obj.end = end_cb_x + 1
         }
 
         console.log(cb_obj.start,cb_obj.end)

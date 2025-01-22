@@ -11,10 +11,23 @@ from data_api.data_api import (
 
 from backtest.backtest import run_backtest_warp
 
-from plot.plot import candlestick_plot, line_plot, layout_plot, output_notebook, show
+from plot.plot import layout_plot
 
 import optuna
 from optimize.run_optuna import optuna_wrapper
+
+
+def get_plot_config(df):
+    plot_config = [
+        {"name": "candle", "height_scale": 0.75, "show": True},
+        {"name": "backtest", "height_scale": 0.25, "show": True},
+    ]
+    if "rsi" in df.columns:
+        plot_config.insert(1, {"name": "rsi", "height_scale": 0.25, "show": True})
+        plot_config[0]["height_scale"] = 0.70
+        plot_config[1]["height_scale"] = 0.15
+        plot_config[2]["height_scale"] = 0.15
+    return plot_config
 
 
 def backtest_wapper(
@@ -40,13 +53,11 @@ def backtest_wapper(
             atr_tsl=strategy_params.get("atr_tsl", 0),
             sltp_limit=strategy_params.get("limit", True),
         )
+        plot_config = get_plot_config(df)
 
         fig = layout_plot(
             df,
-            [
-                {"name": "candle", "height_scale": 0.75, "show": True},
-                {"name": "long_total", "height_scale": 0.25, "show": True},
-            ],
+            plot_config,
             width=800,
             height=400,
             plot_params={**strategy_params, **result},
@@ -81,12 +92,11 @@ def backtest_wapper(
             sltp_limit=strategy_params.get("limit", True),
         )
 
+        plot_config = get_plot_config(df)
+
         fig = layout_plot(
             df,
-            [
-                {"name": "candle", "height_scale": 0.75, "show": True},
-                {"name": "long_total", "height_scale": 0.25, "show": True},
-            ],
+            plot_config,
             width=800,
             height=400,
             plot_params={**test_index_dict, **result, **strategy_params},
