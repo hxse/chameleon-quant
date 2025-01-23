@@ -56,7 +56,9 @@ def run_short(
             tsl = close + atr_list[idx] * atr_tsl
             tsl = (
                 tsl
-                if np.isnan(tsl_list[idx - 1]) or tsl <= tsl_list[idx - 1]
+                if np.isnan(tsl_list[idx - 1])
+                or tsl <= tsl_list[idx - 1]
+                or _last_idx == idx
                 else tsl_list[idx - 1]
             )
             if close >= tsl and status != 1:
