@@ -204,8 +204,8 @@ def trade_api_wapper(
         if mode == "open":
             side_opposite = "sell" if side == "buy" else "buy"
             # price = get_ticker(exchange, symbol)
-
-            if price != None:
+            message_arr = []
+            if price is not None:
                 amount = get_amount(
                     exchange,
                     exchange_name,
@@ -215,25 +215,34 @@ def trade_api_wapper(
                     leverage,
                 )  # order["info"]["origQty"],
                 order = create_order(exchange, symbol, side, amount)
-                message = f"status: {order['status']} amount: {amount} price: {price}"
+                message = (
+                    f"open_status: {order['status']} amount: {amount} price: {price}"
+                )
                 print(message)
-                return message
+                message_arr.append(message)
 
             if exchange_name == "binance":
-                if stopLossParams != None:
+                if stopLossParams is not None:
                     order = stop_loss_order(
                         exchange, symbol, side_opposite, amount, stopLossParams
                     )
-                    message = f"status {order['status']} amount {amount} price {price}"
+                    message = (
+                        f"sl_status: {order['status']} amount {amount} price {price}"
+                    )
                     print(message)
-                    return message
-                if takeProfitPrice != None:
+                    message_arr.append(message)
+
+                if takeProfitPrice is not None:
                     order = take_profit_order(
                         exchange, symbol, side_opposite, amount, takeProfitPrice
                     )
-                    message = f"status {order['status']} amount {amount} price {price}"
+                    message = (
+                        f"tp_status: {order['status']} amount {amount} price {price}"
+                    )
                     print(message)
-                    return message
+                    message_arr.append(message)
+
+            return "\n".join(message_arr)
 
         if mode == "close":
             close_position_all(exchange, symbol)
