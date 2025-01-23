@@ -268,17 +268,17 @@ def loop_time(
             print(now, "last_minute_30")
             callback("30m", strategy, config_path, csv_dir)
 
-        if now.second >= delay and now.hour % 1 == 0 and not last_hour_1 != now.hour:
+        if now.second >= delay and now.hour % 1 == 0 and last_hour_1 != now.hour:
             last_hour_1 = now.hour
             print(now, "last_hour_1")
             callback("1h", strategy, config_path, csv_dir)
 
-        if now.second >= delay and now.hour % 4 == 0 and not last_hour_4 != now.hour:
+        if now.second >= delay and now.hour % 4 == 0 and last_hour_4 != now.hour:
             last_hour_4 = now.hour
             print(now, "last_hour_4")
             callback("4h", strategy, config_path, csv_dir)
 
-        if now.second >= delay and now.day % 1 == 0 and not last_day_1 != now.day:
+        if now.second >= delay and now.day % 1 == 0 and last_day_1 != now.day:
             last_day_1 = now.day
             print(now, "last_day")
             callback("1d", strategy, config_path, csv_dir)
