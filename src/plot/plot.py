@@ -7,6 +7,7 @@ from bokeh.models import (
     DatetimeTickFormatter,
     CrosshairTool,
     Span,
+    Band,
 )
 from bokeh.io import output_notebook
 import numpy as np
@@ -46,6 +47,27 @@ def add_indicator(fig, df, plot_params=None):
             line_color=color[k] if k < len(color) else color[len(color) - 1],
             visible=True,
         )
+
+    if "BBM" in df.columns and "BBU" in df.columns and "BBL" in df.columns:
+        fig.line(
+            "index",
+            "BBM",
+            source=source,
+            line_width=2,
+            line_alpha=1,
+            line_color="grey",
+            visible=True,
+        )
+        band = Band(
+            base="index",
+            lower="BBL",
+            upper="BBU",
+            source=source,
+            fill_alpha=0.03,
+            fill_color="blue",
+            line_color="black",
+        )
+        fig.add_layout(band)
 
     # 仓位菱形线
     fig.line(
