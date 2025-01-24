@@ -28,6 +28,11 @@ def run_short(
 ):
     [idx, n, n2, last_idx, pole_idx] = _array
 
+    if status_list[idx] == 0 and (
+        status_list[idx - 1] == -1 or status_list[idx - 1] == 0
+    ):
+        status_list[idx] = -1
+
     status = status_list[idx]
     open = open_list[idx]
     high = high_list[idx]
@@ -54,6 +59,12 @@ def run_short(
         if pole_diff < 0:
             pole_idx = idx
         # atr_tsl 没有limit模式, 优先级最低, 所以放上面, 在后面放atr_tp, atr_sl, 从而覆盖long_price_list值
+        # 这个是指标离场, 放最上面
+        if status_list[idx] == 0:
+            status = 0
+            last_idx = -1
+            price_list[idx] = close
+
         if atr_tsl != 0:
             tsl = close + atr_list[idx] * atr_tsl
             tsl = (
