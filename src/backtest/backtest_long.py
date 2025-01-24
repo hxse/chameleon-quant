@@ -14,6 +14,7 @@ def run_long(
     is_nan_list,
     status_list,
     idx_list,
+    idx2_list,
     price_list,
     diff_list,
     total_list,
@@ -25,7 +26,7 @@ def run_long(
     atr_tsl=0,
     sltp_limit=False,
 ):
-    [idx, n, last_idx, pole_idx] = _array
+    [idx, n, n2, last_idx, pole_idx] = _array
 
     status = status_list[idx]
     open = open_list[idx]
@@ -37,6 +38,7 @@ def run_long(
         last_idx = idx
         pole_idx = idx
         n = 0
+        n2 += 1
         price_list[idx] = close
 
     if last_idx != -1:
@@ -95,6 +97,7 @@ def run_long(
         # save long value
         status_list[idx] = status
         idx_list[idx] = n
+        idx2_list[idx] = n2
 
         if atr_sl != 0:
             sl_list[idx] = sl
@@ -113,5 +116,5 @@ def run_long(
     else:
         total_list[idx] = total_list[idx - 1]
 
-    _array = [idx, n, last_idx, pole_idx]
+    _array = [idx, n, n2, last_idx, pole_idx]
     return _array

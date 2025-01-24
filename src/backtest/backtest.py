@@ -15,6 +15,7 @@ def run_backtest(
     is_nan_list,
     long_status_list,
     long_idx_list,
+    long_idx2_list,
     long_price_list,
     long_diff_list,
     long_total_list,
@@ -23,6 +24,7 @@ def run_backtest(
     long_tsl_list,
     short_status_list,
     short_idx_list,
+    short_idx2_list,
     short_price_list,
     short_diff_list,
     short_total_list,
@@ -32,6 +34,8 @@ def run_backtest(
     merge_price_list,
     merge_diff_list,
     merge_total_list,
+    merge_idx_list,
+    merge_idx2_list,
     atr_sl=1,
     atr_tp=0,
     atr_tsl=1,
@@ -46,8 +50,10 @@ def run_backtest(
     如果long_status=1, 那么在当前K线忽略任何止损
     merge true, 会忽略掉重合的多头空头持仓
     """
-    long_array = [0, 0, -1, -1]  # idx, n, last_idx, pole_idx
-    short_array = [0, 0, -1, -1]  # idx, n, last_idx, pole_idx
+    long_array = [0, 0, 0, -1, -1]  # idx, n, n2, last_idx, pole_idx
+    short_array = [0, 0, 0, -1, -1]  # idx, n, n2, last_idx, pole_idx
+    merge_n = 0
+    merge_n2 = 0
     for idx in range(len(index_list)):
         if is_nan_list[idx]:
             continue
@@ -73,6 +79,7 @@ def run_backtest(
                 is_nan_list=is_nan_list,
                 status_list=long_status_list,
                 idx_list=long_idx_list,
+                idx2_list=long_idx2_list,
                 price_list=long_price_list,
                 diff_list=long_diff_list,
                 total_list=long_total_list,
@@ -106,6 +113,7 @@ def run_backtest(
                 is_nan_list=is_nan_list,
                 status_list=short_status_list,
                 idx_list=short_idx_list,
+                idx2_list=short_idx2_list,
                 price_list=short_price_list,
                 diff_list=short_diff_list,
                 total_list=short_total_list,
@@ -167,6 +175,19 @@ def run_backtest(
                         merge_price_list[idx] - last_merge_price
                     )
 
+            if long_status_list[idx] == -1 and short_status_list[idx] == -1:
+                merge_idx_list[idx] = -1
+                merge_idx2_list[idx] = -1
+            elif long_status_list[idx] == 1 or short_status_list[idx] == 1:
+                merge_n = 1
+                merge_n2 += 1
+                merge_idx_list[idx] = merge_n
+                merge_idx2_list[idx] = merge_n2
+            else:
+                merge_n += 1
+                merge_idx_list[idx] = merge_n
+                merge_idx2_list[idx] = merge_n2
+
 
 def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=True):
     run_backtest(
@@ -179,6 +200,7 @@ def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=
         df.is_nan.values,
         df.long_status.values,
         df.long_idx.values,
+        df.long_idx2.values,
         df.long_price.values,
         df.long_diff.values,
         df.long_total.values,
@@ -187,6 +209,7 @@ def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=
         df.long_tsl.values,
         df.short_status.values,
         df.short_idx.values,
+        df.short_idx2.values,
         df.short_price.values,
         df.short_diff.values,
         df.short_total.values,
@@ -196,6 +219,8 @@ def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=
         df.merge_price.values,
         df.merge_diff.values,
         df.merge_total.values,
+        df.merge_idx.values,
+        df.merge_idx2.values,
         atr_sl=atr_sl,
         atr_tp=atr_tp,
         atr_tsl=atr_tsl,
