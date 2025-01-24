@@ -53,6 +53,7 @@ def push_telegram_channel(config_path, data, fig=None, fig_path="", send_html=Fa
             print("not detected tg_bot_token or tg_channel_id")
             return
 
+        data = ("\n".join([f"{k}: {v}" for k, v in data.items()])).replace("\n", "%0A")
         url = f"https://api.telegram.org/bot{tg_bot_token}/sendMessage?chat_id={tg_channel_id}&text={data}"
 
         res = niquests.get(url)

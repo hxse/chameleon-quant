@@ -75,6 +75,8 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
 
 
 def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_path):
+    now = datetime.datetime.now(zone)
+
     exchange_name = strategy_params["exchange_name"]
     symbol = strategy_params["symbol"]
 
@@ -118,6 +120,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
+                "date": now,
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "side": "buy",
@@ -155,6 +158,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
+                "date": now,
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "side": "sell",
@@ -182,6 +186,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
+                "date": now,
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "price": price,
@@ -205,6 +210,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
+                "date": now,
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "price": price,
