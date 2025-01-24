@@ -28,13 +28,38 @@ def add_indicator(fig, df, plot_params=None):
 
     # inc = df.close > df.open
     # dec = ~inc
+    _arr = [
+        ["long_price_even", "_long_price", "long_idx2", 0],
+        ["long_price_odd", "_long_price", "long_idx2", 1],
+        ["short_price_even", "_short_price", "short_idx2", 0],
+        ["short_price_odd", "_short_price", "short_idx2", 1],
+        ["long_sl_even", "long_sl", "long_idx2", 0],
+        ["long_sl_odd", "long_sl", "long_idx2", 1],
+        ["short_sl_even", "short_sl", "short_idx2", 0],
+        ["short_sl_odd", "short_sl", "short_idx2", 1],
+        ["long_tp_even", "long_tp", "long_idx2", 0],
+        ["long_tp_odd", "long_tp", "long_idx2", 1],
+        ["short_tp_even", "short_tp", "short_idx2", 0],
+        ["short_tp_odd", "short_tp", "short_idx2", 1],
+        ["long_tsl_even", "long_tsl", "long_idx2", 0],
+        ["long_tsl_odd", "long_tsl", "long_idx2", 1],
+        ["short_tsl_even", "short_tsl", "short_idx2", 0],
+        ["short_tsl_odd", "short_tsl", "short_idx2", 1],
+    ]
+    for i in _arr:
+        target, origin, idx2, mode = i
+        df[target] = np.nan
+        df.loc[df[idx2] % 2 == mode, target] = df[origin]
+
+    df.drop(["_long_price"], axis=1, inplace=True)
+    df.drop(["_short_price"], axis=1, inplace=True)
 
     source = ColumnDataSource(data=df)
     # source_inc = ColumnDataSource(data=df[inc])
     # source_dec = ColumnDataSource(data=df[dec])
 
-    df.drop(["_long_price"], axis=1, inplace=True)
-    df.drop(["_short_price"], axis=1, inplace=True)
+    for i in _arr:
+        df.drop(i[0], axis=1, inplace=True)
 
     color = ["orange", "green", "blue", "purple", "grey"]
     for k, v in enumerate([i for i in df.columns if "sma" in i]):
@@ -69,101 +94,81 @@ def add_indicator(fig, df, plot_params=None):
         )
         fig.add_layout(band)
 
-    # 仓位菱形线
-    fig.line(
-        "index",
-        "_long_price",
-        source=source,
-        line_width=12,
-        line_alpha=0.7,
-        line_color="orange",
-        visible=True,
-        line_dash="dotted",
-    )
+    for i in [
+        ["long_price_even", "orange"],
+        ["long_price_odd", "orange"],
+        ["short_price_even", "purple"],
+        ["short_price_odd", "purple"],
+    ]:
+        col_name, color = i
+        # 仓位菱形线
+        fig.line(
+            "index",
+            col_name,
+            source=source,
+            line_width=12,
+            line_alpha=0.7,
+            line_color=color,
+            visible=True,
+            line_dash="dotted",
+        )
 
-    # 仓位菱形线
-    fig.line(
-        "index",
-        "_short_price",
-        source=source,
-        line_width=12,
-        line_alpha=0.7,
-        line_color="purple",
-        visible=True,
-        line_dash="dotted",
-    )
+    for i in [
+        ["long_sl_even", "orange"],
+        ["long_sl_odd", "orange"],
+        ["short_sl_even", "purple"],
+        ["short_sl_odd", "purple"],
+    ]:
+        col_name, color = i
+        # 仓位止损线
+        fig.line(
+            "index",
+            col_name,
+            source=source,
+            line_width=4,
+            line_alpha=1,
+            line_color=color,
+            visible=True,
+            line_dash="dotted",
+        )
 
-    # 仓位止损线
-    fig.line(
-        "index",
-        "long_sl",
-        source=source,
-        line_width=4,
-        line_alpha=1,
-        line_color="orange",
-        visible=True,
-        line_dash="dotted",
-    )
+    for i in [
+        ["long_tp_even", "orange"],
+        ["long_tp_odd", "orange"],
+        ["short_tp_even", "purple"],
+        ["short_tp_odd", "purple"],
+    ]:
+        col_name, color = i
+        # 仓位止盈线
+        fig.line(
+            "index",
+            col_name,
+            source=source,
+            line_width=4,
+            line_alpha=1,
+            line_color=color,
+            visible=True,
+            line_dash="dotted",
+        )
 
-    # 仓位止损线
-    fig.line(
-        "index",
-        "short_sl",
-        source=source,
-        line_width=4,
-        line_alpha=1,
-        line_color="purple",
-        visible=True,
-        line_dash="dotted",
-    )
-
-    # 仓位止盈线
-    fig.line(
-        "index",
-        "long_tp",
-        source=source,
-        line_width=4,
-        line_alpha=1,
-        line_color="orange",
-        visible=True,
-        line_dash="dotted",
-    )
-
-    # 仓位止盈线
-    fig.line(
-        "index",
-        "short_tp",
-        source=source,
-        line_width=4,
-        line_alpha=1,
-        line_color="purple",
-        visible=True,
-        line_dash="dotted",
-    )
-
-    # 仓位追踪止损线
-    fig.line(
-        "index",
-        "long_tsl",
-        source=source,
-        line_width=4,
-        line_alpha=1,
-        line_color="orange",
-        visible=True,
-        line_dash="dashed",
-    )
-
-    # 仓位追踪止损线
-    fig.line(
-        "index",
-        "short_tsl",
-        source=source,
-        line_width=4,
-        line_alpha=1,
-        line_color="purple",
-        visible=True,
-        line_dash="dashed",
-    )
+    for i in [
+        ["long_tsl_even", "orange"],
+        ["long_tsl_odd", "orange"],
+        ["short_tsl_even", "purple"],
+        ["short_tsl_odd", "purple"],
+    ]:
+        col_name, color = i
+        # 仓位追踪止损线
+        fig.line(
+            "index",
+            col_name,
+            source=source,
+            line_width=4,
+            line_alpha=1,
+            line_color=color,
+            visible=True,
+            line_dash="dashed",
+        )
 
     if "test_index_start" in plot_params and plot_params["test_index_start"]:
         dst_end = Span(
