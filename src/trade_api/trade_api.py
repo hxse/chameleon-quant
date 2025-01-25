@@ -160,12 +160,11 @@ def close_position_all(exchange, symbol):
     close all exist position
     """
     params = {"reduceOnly": True}
-    orders_all = exchange.fetch_positions()
+    orders_all = exchange.fetch_positions([symbol])
     for i in orders_all:
-        if i["info"]["symbol"] == symbol.replace("/", ""):
-            side = "sell" if i["side"] == "long" else "buy"
-            amount = i["contracts"]
-            exchange.create_order(symbol, "market", side, amount, params=params)
+        side = "sell" if i["side"] == "long" else "buy"
+        amount = i["contracts"]
+        exchange.create_order(symbol, "market", side, amount, params=params)
     orders_all = exchange.fetch_positions()
     return orders_all
 
@@ -174,7 +173,7 @@ def cancel_order_all(exchange, symbol):
     """
     cancel all order when orders_all == 0
     """
-    orders_all = exchange.fetch_positions()
+    orders_all = exchange.fetch_positions([symbol])
     if len(orders_all) == 0:
         orders_all = exchange.fetch_orders(symbol)
         for i in orders_all:
