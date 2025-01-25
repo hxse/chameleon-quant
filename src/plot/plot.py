@@ -62,7 +62,7 @@ def add_indicator(fig, df, plot_params=None):
         df.drop(i[0], axis=1, inplace=True)
 
     color = ["orange", "green", "blue", "purple", "grey"]
-    for k, v in enumerate([i for i in df.columns if "sma" in i]):
+    for k, v in enumerate([i for i in df.columns if "ma" in i]):
         fig.line(
             "index",
             v,
@@ -73,26 +73,32 @@ def add_indicator(fig, df, plot_params=None):
             visible=True,
         )
 
-    if "BBM" in df.columns and "BBU" in df.columns and "BBL" in df.columns:
-        fig.line(
-            "index",
-            "BBM",
-            source=source,
-            line_width=2,
-            line_alpha=1,
-            line_color="grey",
-            visible=True,
-        )
-        band = Band(
-            base="index",
-            lower="BBL",
-            upper="BBU",
-            source=source,
-            fill_alpha=0.03,
-            fill_color="blue",
-            line_color="black",
-        )
-        fig.add_layout(band)
+    for i in df.columns:
+        for c in ["BBM", "KCB"]:
+            if c in i:
+                name, suffix = i.rsplit("_", 1)
+                fig.line(
+                    "index",
+                    f"{name}_{suffix}",
+                    source=source,
+                    line_width=2,
+                    line_alpha=1,
+                    line_color="grey",
+                    visible=True,
+                )
+        for c in ["BBU", "KCU"]:
+            if c in i:
+                name, suffix = i.rsplit("_", 1)
+                band = Band(
+                    base="index",
+                    lower=f"BBL_{suffix}" if name == "BBU" else f"KCL_{suffix}",
+                    upper=f"BBU_{suffix}" if name == "BBU" else f"KCU_{suffix}",
+                    source=source,
+                    fill_alpha=0.03,
+                    fill_color="blue",
+                    line_color="black",
+                )
+                fig.add_layout(band)
 
     for i in [
         ["long_price_even", "orange"],
