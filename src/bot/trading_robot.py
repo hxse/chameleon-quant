@@ -120,7 +120,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": now,
+                "date": f"{now.replace(microsecond=0).isoformat()}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "open",
@@ -158,7 +158,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": now,
+                "date": f"{now.replace(microsecond=0).isoformat()}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "open",
@@ -186,7 +186,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": now,
+                "date": f"{now.replace(microsecond=0).isoformat()}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "long_close",
@@ -210,7 +210,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": now,
+                "date": f"{now.replace(microsecond=0).isoformat()}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "short_close",
@@ -336,7 +336,8 @@ def loop_time(
 
 
 def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
-    print("run trading_robot")
+    now = datetime.datetime.now(zone)
+    print(f"{now.replace(microsecond=0).isoformat()} run trading_robot")
     loop_time(config_path=config_path, csv_dir=csv_dir)
 
 
