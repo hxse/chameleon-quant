@@ -3,8 +3,8 @@ import time
 import datetime
 from zoneinfo import ZoneInfo
 import numpy as np
-
-
+import json
+from pathlib import Path
 import sys
 
 sys.path.append("src")
@@ -233,14 +233,38 @@ def callback(_p, strategy, config_path, csv_dir):
             )
 
 
+def init_log(path):
+    data = {
+        "last_minute_5": None,
+        "last_minute_30": None,
+        "last_hour_1": None,
+        "last_hour_4": None,
+        "last_day_1": None,
+    }
+    dump_log(path, data)
+    return data
+
+
+def dump_log(path, data):
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+
+
+def load_log(path):
+    with open(path, "r", encoding="utf-8") as file:
+        data = json.load(file)
+        return data
+
+
 def loop_time(
     zone=zone, delay=10, config_path="src/strategy/config", csv_dir="src/csv"
 ):
-    last_minute_5 = None
-    last_minute_30 = None
-    last_hour_1 = None
-    last_hour_4 = None
-    last_day_1 = None
+    log_path = Path(config_path).parent / "log.json"
+    if Path(log_path).is_file():
+        log_data = load_log(log_path)
+    else:
+        log_data = init_log(log_path)
+
     while 1:
         try:
             strategy = reload_strategy()
@@ -259,35 +283,54 @@ def loop_time(
         now = datetime.datetime.now(zone)
 
         if (
-            now.second >= delay and now.minute % 5 == 0 and last_minute_5 != now.minute
+            now.second >= delay
+            and now.minute % 5 == 0
+            and log_data["last_minute_5"] != now.minute
         ):  # 测试时改成1, 测试完了改成5
-            last_minute_5 = now.minute
+            log_data["last_minute_5"] = now.minute
             print(now, "last_minute_5")
             callback("5m", strategy, config_path, csv_dir)
+            dump_log(log_path, log_data)
 
         if (
             now.second >= delay
             and now.minute % 30 == 0
-            and last_minute_30 != now.minute
+            and log_data["last_minute_30"] != now.minute
         ):
-            last_minute_30 = now.minute
+            log_data["last_minute_30"] = now.minute
             print(now, "last_minute_30")
             callback("30m", strategy, config_path, csv_dir)
+            dump_log(log_path, log_data)
 
-        if now.second >= delay and now.hour % 1 == 0 and last_hour_1 != now.hour:
-            last_hour_1 = now.hour
+        if (
+            now.second >= delay
+            and now.hour % 1 == 0
+            and log_data["last_hour_1"] != now.hour
+        ):
+            log_data["last_hour_1"] = now.hour
             print(now, "last_hour_1")
             callback("1h", strategy, config_path, csv_dir)
+            dump_log(log_path, log_data)
 
-        if now.second >= delay and now.hour % 4 == 0 and last_hour_4 != now.hour:
-            last_hour_4 = now.hour
+        if (
+            now.second >= delay
+            and now.hour % 4 == 0
+            and log_data["last_hour_4"] != now.hour
+        ):
+            log_data["last_hour_4"] = now.hour
             print(now, "last_hour_4")
             callback("4h", strategy, config_path, csv_dir)
+            dump_log(log_path, log_data)
 
-        if now.second >= delay and now.day % 1 == 0 and last_day_1 != now.day:
-            last_day_1 = now.day
+        if (
+            now.second >= delay
+            and now.day % 1 == 0
+            and log_data["last_day_1"] != now.day
+        ):
+            log_data["last_day_1"] = now.day
             print(now, "last_day")
             callback("1d", strategy, config_path, csv_dir)
+            dump_log(log_path, log_data)
 
         time.sleep(delay)
 
