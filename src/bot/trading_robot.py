@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import json
 from pathlib import Path
+from memory_profiler import profile
 import sys
 
 sys.path.append("src")
@@ -335,6 +336,7 @@ def loop_time(
         time.sleep(delay)
 
 
+@profile
 def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
     now = datetime.datetime.now(zone)
     print(f"{now.replace(microsecond=0).isoformat()} run trading_robot")
