@@ -19,7 +19,6 @@ dependencies = [
     "uvicorn>=0.34.0",
     "pandas-ta>=0.3.14b0",
     "ccxt>=4.4.50",
-    "psutil>=6.1.1",
 ]
 
 

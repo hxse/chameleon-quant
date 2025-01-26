@@ -340,7 +340,7 @@ def loop_time(
 def get_memory():
     process = psutil.Process()
     rss = process.memory_info().rss
-    print(f"{rss / 1024 / 1024} M")
+    print(f"memory: {rss / 1024 / 1024} M")
     return rss
 
 
