@@ -236,6 +236,7 @@ def callback(_p, strategy, config_path, csv_dir):
             run_trade_api(
                 exchange, strategy_params, df, result, fig, config_path, fig_path
             )
+            del df, fig
 
 
 def init_log(path):
