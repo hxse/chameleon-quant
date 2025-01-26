@@ -74,7 +74,7 @@ def add_indicator(fig, df, plot_params=None):
         )
 
     for i in df.columns:
-        for c in ["BBM", "KCB"]:
+        for c in ["CM"]:
             if c in i:
                 name, suffix = i.rsplit("_", 1)
                 fig.line(
@@ -86,13 +86,13 @@ def add_indicator(fig, df, plot_params=None):
                     line_color="grey",
                     visible=True,
                 )
-        for c in ["BBU", "KCU"]:
+        for c in ["CU"]:
             if c in i:
                 name, suffix = i.rsplit("_", 1)
                 band = Band(
                     base="index",
-                    lower=f"BBL_{suffix}" if name == "BBU" else f"KCL_{suffix}",
-                    upper=f"BBU_{suffix}" if name == "BBU" else f"KCU_{suffix}",
+                    lower=f"CL_{suffix}" if name == "CU" else f"CL_{suffix}",
+                    upper=f"CU_{suffix}" if name == "CU" else f"CU_{suffix}",
                     source=source,
                     fill_alpha=0.03,
                     fill_color="blue",

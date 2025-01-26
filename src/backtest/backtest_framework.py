@@ -24,9 +24,9 @@ def get_plot_config(df):
     ]
     if "rsi" in df.columns:
         plot_config.insert(1, {"name": "rsi", "height_scale": 0.25, "show": True})
-        plot_config[0]["height_scale"] = 0.70
+        plot_config[0]["height_scale"] = 0.60
         plot_config[1]["height_scale"] = 0.15
-        plot_config[2]["height_scale"] = 0.15
+        plot_config[2]["height_scale"] = 0.25
     return plot_config
 
 
