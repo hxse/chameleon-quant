@@ -121,7 +121,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat()}",
+                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "open",
@@ -159,7 +159,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat()}",
+                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "open",
@@ -187,7 +187,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat()}",
+                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "long_close",
@@ -211,7 +211,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat()}",
+                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "short_close",
@@ -347,7 +347,7 @@ def get_memory():
 def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
     get_memory()
     now = datetime.datetime.now(zone)
-    print(f"{now.replace(microsecond=0).isoformat()} run trading_robot")
+    print(f"{now.replace(microsecond=0).isoformat(' ')} run trading_robot")
     loop_time(config_path=config_path, csv_dir=csv_dir)
 
 
