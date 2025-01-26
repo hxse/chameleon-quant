@@ -35,6 +35,10 @@ def get_exchange_name(_name, account, _p):
     return f"{_name} {account} {_p}"
 
 
+def iso_time(now):
+    return now.replace(microsecond=0).isoformat(" ")
+
+
 exchange_dict = {}
 
 
@@ -121,7 +125,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
+                "date": f"{iso_time(now)}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "open",
@@ -159,7 +163,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
+                "date": f"{iso_time(now)}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "open",
@@ -187,7 +191,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
+                "date": f"{iso_time(now)}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "long_close",
@@ -211,7 +215,7 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
         push_telegram_channel(
             config_path,
             data={
-                "date": f"{now.replace(microsecond=0).isoformat(' ')}",
+                "date": f"{iso_time(now)}",
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "mode": "short_close",
@@ -289,7 +293,7 @@ def loop_time(
             and log_data["last_minute_5"] != now.minute
         ):  # 测试时改成1, 测试完了改成5
             log_data["last_minute_5"] = now.minute
-            print(now, "last_minute_5")
+            print(iso_time(now), "last_minute_5")
             callback("5m", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
             get_memory()
@@ -299,7 +303,7 @@ def loop_time(
             and log_data["last_minute_30"] != now.minute
         ):
             log_data["last_minute_30"] = now.minute
-            print(now, "last_minute_30")
+            print(iso_time(now), "last_minute_30")
             callback("30m", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
             get_memory()
@@ -309,7 +313,7 @@ def loop_time(
             and log_data["last_hour_1"] != now.hour
         ):
             log_data["last_hour_1"] = now.hour
-            print(now, "last_hour_1")
+            print(iso_time(now), "last_hour_1")
             callback("1h", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
             get_memory()
@@ -319,7 +323,7 @@ def loop_time(
             and log_data["last_hour_4"] != now.hour
         ):
             log_data["last_hour_4"] = now.hour
-            print(now, "last_hour_4")
+            print(iso_time(now), "last_hour_4")
             callback("4h", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
             get_memory()
@@ -329,7 +333,7 @@ def loop_time(
             and log_data["last_day_1"] != now.day
         ):
             log_data["last_day_1"] = now.day
-            print(now, "last_day")
+            print(iso_time(now), "last_day")
             callback("1d", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
             get_memory()
@@ -347,7 +351,7 @@ def get_memory():
 def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
     get_memory()
     now = datetime.datetime.now(zone)
-    print(f"{now.replace(microsecond=0).isoformat(' ')} run trading_robot")
+    print(f"{iso_time(now)} run trading_robot")
     loop_time(config_path=config_path, csv_dir=csv_dir)
 
 
