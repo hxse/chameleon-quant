@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import json
 from pathlib import Path
-from memory_profiler import profile
+import psutil
 import sys
 
 sys.path.append("src")
@@ -292,7 +292,7 @@ def loop_time(
             print(now, "last_minute_5")
             callback("5m", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
-
+            get_memory()
         if (
             now.second >= delay
             and now.minute % 30 == 0
@@ -302,7 +302,7 @@ def loop_time(
             print(now, "last_minute_30")
             callback("30m", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
-
+            get_memory()
         if (
             now.second >= delay
             and now.hour % 1 == 0
@@ -312,7 +312,7 @@ def loop_time(
             print(now, "last_hour_1")
             callback("1h", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
-
+            get_memory()
         if (
             now.second >= delay
             and now.hour % 4 == 0
@@ -322,7 +322,7 @@ def loop_time(
             print(now, "last_hour_4")
             callback("4h", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
-
+            get_memory()
         if (
             now.second >= delay
             and now.day % 1 == 0
@@ -332,12 +332,20 @@ def loop_time(
             print(now, "last_day")
             callback("1d", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
+            get_memory()
 
         time.sleep(delay)
 
 
-@profile
+def get_memory():
+    process = psutil.Process()
+    rss = process.memory_info().rss
+    print(f"{rss / 1024 / 1024} M")
+    return rss
+
+
 def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
+    get_memory()
     now = datetime.datetime.now(zone)
     print(f"{now.replace(microsecond=0).isoformat()} run trading_robot")
     loop_time(config_path=config_path, csv_dir=csv_dir)
