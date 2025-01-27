@@ -188,6 +188,16 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
             stopLossParams=None,
             mode="close",
         )
+        message = trade_api_wapper(
+            exchange,
+            strategy_params,
+            side=None,
+            leverage=1,
+            price=None,
+            takeProfitPrice=None,
+            stopLossParams=None,
+            mode="cancel",
+        )
         push_telegram_channel(
             config_path,
             data={
@@ -211,6 +221,16 @@ def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_p
             takeProfitPrice=None,
             stopLossParams=None,
             mode="close",
+        )
+        message = trade_api_wapper(
+            exchange,
+            strategy_params,
+            side=None,
+            leverage=1,
+            price=None,
+            takeProfitPrice=None,
+            stopLossParams=None,
+            mode="cancel",
         )
         push_telegram_channel(
             config_path,
