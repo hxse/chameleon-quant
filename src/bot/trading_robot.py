@@ -289,7 +289,11 @@ def load_log(path):
 
 
 def loop_time(
-    zone=zone, delay=10, config_path="src/strategy/config", csv_dir="src/csv"
+    zone=zone,
+    delay=10,
+    config_path="src/strategy/config",
+    csv_dir="src/csv",
+    reload=False,
 ):
     log_path = Path(config_path).parent / "log.json"
     if Path(log_path).is_file():
@@ -299,7 +303,7 @@ def loop_time(
 
     while 1:
         try:
-            strategy = reload_strategy()
+            strategy = reload_strategy(reload=reload)
         except SyntaxError as e:
             print(e)
             time.sleep(delay)
@@ -375,11 +379,11 @@ def get_memory():
     return rss
 
 
-def main(config_path="src/strategy/config.json", csv_dir="src/csv"):
+def main(config_path="src/strategy/config.json", csv_dir="src/csv", reload=False):
     get_memory()
     now = datetime.datetime.now(zone)
     print(f"{iso_time(now)} run trading_robot")
-    loop_time(config_path=config_path, csv_dir=csv_dir)
+    loop_time(config_path=config_path, csv_dir=csv_dir, reload=reload)
 
 
 if __name__ == "__main__":
