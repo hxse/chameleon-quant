@@ -229,7 +229,7 @@ wheels = [
 
 [[package]]
 name = "ccxt"
-version = "4.4.50"
+version = "4.4.51"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiodns" },
@@ -241,9 +241,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/47/378d9180d66cc5a0290e90f05a45dacf9da0dfd93d8776376e667dda6711/ccxt-4.4.50.tar.gz", hash = "sha256:79d28a50c3aea21378fcbf054a95d1fca46cea50be9b1f6d9e67eee1fdb83ffe", size = 5288838 }
+sdist = { url = "https://files.pythonhosted.org/packages/d0/94/208faa09894c5d0a20843aad235392d61115b3207105d61c200f43ac6aa1/ccxt-4.4.51.tar.gz", hash = "sha256:2d53548a3b96fb125a9f67cf04583adab700d80a465f92af8a274009a04d9fbe", size = 5302028 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b6/ce/d6a205a5ce99d567846fad48e8f6e1dbdc4baabe46b69194e82b502e5fec/ccxt-4.4.50-py2.py3-none-any.whl", hash = "sha256:4f2ce2f70fa7a41416626dd3b90288900fd9d5fa892989abd9a21e784058a5cb", size = 5659125 },
+    { url = "https://files.pythonhosted.org/packages/7e/4c/8d53791848c17bedc419f45d92c27b72ba11c901bf317bd698d0d5a121d0/ccxt-4.4.51-py2.py3-none-any.whl", hash = "sha256:a21eece77ee2bb59d7c63b35c155cbdbef2e4db5cc0cdb41f736ebba7b726f5d", size = 5666869 },
 ]
 
 [[package]]
@@ -594,14 +594,14 @@ wheels = [
 
 [[package]]
 name = "deprecated"
-version = "1.2.17"
+version = "1.2.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2f/20/caa25c084ebad492360bf28ba5cb74f27b50fc6f3df965fd0add2b5b5993/deprecated-1.2.17.tar.gz", hash = "sha256:0114a10f0bbb750b90b2c2296c90cf7e9eaeb0abb5cf06c80de2c60138de0a82", size = 2928237 }
+sdist = { url = "https://files.pythonhosted.org/packages/98/97/06afe62762c9a8a86af0cfb7bfdab22a43ad17138b07af5b1a58442690a2/deprecated-1.2.18.tar.gz", hash = "sha256:422b6f6d859da6f2ef57857761bfb392480502a64c3028ca9bbe86085d72115d", size = 2928744 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/90/89be9a665bf63d3baaba6f34d9a514655abb42be2cc129f31c96df2cef51/Deprecated-1.2.17-py2.py3-none-any.whl", hash = "sha256:69cdc0a751671183f569495e2efb14baee4344b0236342eec29f1fde25d61818", size = 9140 },
+    { url = "https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl", hash = "sha256:bd5011788200372a32418f888e326a09ff80d0214bd961147cfed01b5c018eec", size = 9998 },
 ]
 
 [[package]]
@@ -958,11 +958,11 @@ wheels = [
 
 [[package]]
 name = "kiss-headers"
-version = "2.4.3"
+version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b7/6d/38924e42f83d18a133991cdfec631aecec1ee75c19716696b56975b914bc/kiss_headers-2.4.3.tar.gz", hash = "sha256:70c689ce167ac83146f094ea916b40a3767d67c2e05a4cb95b0fd2e33bf243f1", size = 72294 }
+sdist = { url = "https://files.pythonhosted.org/packages/09/c1/8c6c563328ca0721b7c5fb7dbcd1e3ba48b5a2e336890bb7510c5146b6b6/kiss_headers-2.5.0.tar.gz", hash = "sha256:63ce797b6d85763d4b0e9611bd62d30fe31b0c4edb601838e76a039e4a4cdb59", size = 71911 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f9/3e/9d8f56a758d8259abd6e33417067013a217f7db9e2f37a76d637c5439b9d/kiss_headers-2.4.3-py3-none-any.whl", hash = "sha256:9d800b77532068e8748be9f96f30eaeb547cdc5345e4689ddf07b77071256239", size = 43800 },
+    { url = "https://files.pythonhosted.org/packages/24/60/c63e6ff0ee5c038bc31ebcfd5824730a6637e04cd769080c2dd95f0e3ad6/kiss_headers-2.5.0-py3-none-any.whl", hash = "sha256:db49d2e906aa1da7a7bb98357f4c21aa857dc6ed426753d9d90c527eb1b7aa6a", size = 43579 },
 ]
 
 [[package]]
