@@ -21,12 +21,18 @@ zone = datetime.timezone.utc
 zone = ZoneInfo("Asia/Shanghai")
 
 
-def reload_strategy():
+def reload_strategy(reload=False):
     import strategy
+
+    if not reload:
+        return strategy
 
     import importlib
 
     importlib.reload(strategy)
+
+    for i in strategy.strategy_arr:
+        importlib.reload(i[1])
 
     return strategy
 
