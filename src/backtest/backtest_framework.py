@@ -51,7 +51,8 @@ def backtest_wapper(
             atr_sl=strategy_params.get("atr_sl", 0),
             atr_tp=strategy_params.get("atr_tp", 0),
             atr_tsl=strategy_params.get("atr_tsl", 0),
-            sltp_limit=strategy_params.get("limit", True),
+            sltp_limit=strategy_params.get("sltp_limit", True),
+            tsl_pole=strategy_params.get("tsl_pole", True),
         )
         plot_config = get_plot_config(df)
 
@@ -89,7 +90,8 @@ def backtest_wapper(
             atr_sl=strategy_params.get("atr_sl", 0),
             atr_tp=strategy_params.get("atr_tp", 0),
             atr_tsl=strategy_params.get("atr_tsl", 0),
-            sltp_limit=strategy_params.get("limit", True),
+            sltp_limit=strategy_params.get("sltp_limit", True),
+            tsl_pole=strategy_params.get("tsl_pole", True),
         )
 
         plot_config = get_plot_config(df)

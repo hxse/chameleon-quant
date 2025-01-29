@@ -24,7 +24,8 @@ def optuna_wrapper(df, strategy, strategy_params, optuna_params):
             atr_sl=_params.get("atr_sl", 0),
             atr_tp=_params.get("atr_tp", 0),
             atr_tsl=_params.get("atr_tsl", 0),
-            sltp_limit=_params.get("limit", True),
+            sltp_limit=strategy_params.get("sltp_limit", True),
+            tsl_pole=strategy_params.get("tsl_pole", True),
         )["total"]
 
     return objective

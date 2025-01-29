@@ -40,6 +40,7 @@ def run_backtest(
     atr_tp=0,
     atr_tsl=1,
     sltp_limit=True,
+    tsl_pole=True,
     merge=True,
 ):
     """
@@ -90,6 +91,7 @@ def run_backtest(
                 atr_tp=atr_tp,
                 atr_tsl=atr_tsl,
                 sltp_limit=sltp_limit,
+                tsl_pole=tsl_pole,
             )
 
         short_array[0] = idx
@@ -124,6 +126,7 @@ def run_backtest(
                 atr_tp=atr_tp,
                 atr_tsl=atr_tsl,
                 sltp_limit=sltp_limit,
+                tsl_pole=tsl_pole,
             )
 
         if merge:
@@ -189,7 +192,9 @@ def run_backtest(
                 merge_idx2_list[idx] = merge_n2
 
 
-def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=True):
+def run_backtest_warp(
+    df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, tsl_pole=True, merge=True
+):
     run_backtest(
         df.index.values.astype("float64"),
         df.open.values,
@@ -225,6 +230,7 @@ def run_backtest_warp(df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, merge=
         atr_tp=atr_tp,
         atr_tsl=atr_tsl,
         sltp_limit=sltp_limit,
+        tsl_pole=tsl_pole,
         merge=merge,
     )
     df["long_count"] = df["long_status"]

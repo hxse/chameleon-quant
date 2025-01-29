@@ -25,6 +25,7 @@ def run_long(
     atr_tp=1,
     atr_tsl=0,
     sltp_limit=False,
+    tsl_pole=True,
 ):
     [idx, n, n2, last_idx, pole_idx] = _array
 
@@ -66,7 +67,8 @@ def run_long(
             price_list[idx] = close
 
         if atr_tsl != 0:
-            tsl = close - atr_list[idx] * atr_tsl
+            _ = high if tsl_pole else close
+            tsl = _ - atr_list[idx] * atr_tsl
             tsl = (
                 tsl
                 if np.isnan(tsl_list[idx - 1])
