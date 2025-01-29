@@ -37,8 +37,12 @@ def reload_strategy(reload=False):
     return strategy
 
 
-def get_exchange_name(_name, account, _p):
-    return f"{_name} {account} {_p}"
+def get_exchange_name(_name, _s):
+    exchange_name = _s.strategy_params["exchange_name"]
+    account = _s.strategy_params["account"]
+    mode = _s.strategy_params["mode"]
+    type = _s.strategy_params["type"]
+    return f"{exchange_name} {type} {mode} {account}"
 
 
 def iso_time(now):
@@ -58,7 +62,7 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
     if signal_time == period and _s.strategy_params.get("enable_bot", False):
         print(f"run {period} {_name} {_s}")
 
-        exchange = exchange_dict.get(get_exchange_name(_name, account, period), None)
+        exchange = exchange_dict.get(get_exchange_name(_name, _s), None)
 
         start_time = time.time()
         [df, exchange, csv_path] = get_data_wapper(
@@ -81,7 +85,7 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
         )
         print("run strategy %s second" % (time.time() - start_time))
 
-        exchange_dict[get_exchange_name(_name, account, period)] = exchange
+        exchange_dict[get_exchange_name(_name, _s)] = exchange
         return [exchange, _s.strategy_params, df, result, fig, _study, csv_path]
 
 
