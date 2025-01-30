@@ -14,7 +14,7 @@ period_dict = {"5m": 5, "15m": 15, "30m": 30, "1h": 60, "4h": 240, "1d": 1440}
 
 
 def fetch_ohlcv(exchange, symbol, period, since, limit):
-    new_ohlcv = exchange.fetch_ohlcv(symbol, period, since=since, limit=limit)
+    new_ohlcv = exchange.fetch_ohlcv(symbol, period, since=since, limit=limit + 1)
     return new_ohlcv[:-1]
 
 
