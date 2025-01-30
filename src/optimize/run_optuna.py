@@ -1,5 +1,4 @@
 import optuna
-from data_api.data_api import split_data
 from backtest.backtest import run_backtest_warp
 
 

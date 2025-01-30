@@ -75,7 +75,7 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
         print("get data %s second" % (time.time() - start_time))
 
         start_time = time.time()
-        [exchange, df, result, fig, _study] = backtest_wapper(
+        [exchange, df, result, fig, _] = backtest_wapper(
             df,
             strategy=_s.strategy,
             strategy_params=_s.strategy_params,
@@ -86,7 +86,15 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
         print("run strategy %s second" % (time.time() - start_time))
 
         exchange_dict[get_exchange_name(_name, _s)] = exchange
-        return [exchange, _s.strategy_params, df, result, fig, _study, csv_path]
+        return [
+            exchange,
+            _s.strategy_params,
+            df,
+            result,
+            fig,
+            _,
+            csv_path,
+        ]
 
 
 def run_trade_api(exchange, strategy_params, df, result, fig, config_path, fig_path):
@@ -261,7 +269,15 @@ def callback(_p, strategy, config_path, csv_dir):
     for [_name, _s] in strategy.strategy_arr:
         res = run_strategy(_p, _name, _s, config_path, csv_dir)
         if res is not None:
-            [exchange, strategy_params, df, result, fig, _, csv_path] = res
+            [
+                exchange,
+                strategy_params,
+                df,
+                result,
+                fig,
+                _,
+                csv_path,
+            ] = res
             fig_path = save_fig_file(fig, config_path, csv_path)
             run_trade_api(
                 exchange, strategy_params, df, result, fig, config_path, fig_path

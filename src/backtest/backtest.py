@@ -252,7 +252,7 @@ def run_backtest_warp(
 
     df["conflict"] = np.nan
     conflict = (df["long_status"] == 1) & (df["short_status"] == 1)
-    df.loc[conflict, "conflict"] = True
+    df.loc[conflict, "conflict"] = 1
     conflict_count = df["conflict"].count()
     df.drop(["conflict"], axis=1, inplace=True)
 

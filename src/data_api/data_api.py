@@ -220,15 +220,18 @@ def get_data_wapper(
         return [ohlcv_df, exchange, csv_path]
 
 
-def split_data(df, ratio=0.3, copy=True):
-    test_num = int(len(df) * ratio)
-    if copy:
-        return df[0:-test_num].copy()
-    return df[0:-test_num]
-
-
-def get_test_index(df, train_df):
-    return {"test_index_start": len(train_df), "test_index_stop": len(df) - 1}
+def get_split_idx(df, ratio=0.2):
+    num = int(len(df) * ratio)
+    return {
+        "df_start": 0,
+        "df_stop": len(df),
+        "train_start": 0,
+        "train_stop": len(df) - num * 2,
+        "valid_start": len(df) - num * 2,
+        "valid_stop": len(df) - num * 1,
+        "test_start": len(df) - num * 1,
+        "test_stop": len(df),
+    }
 
 
 def init_data(df):

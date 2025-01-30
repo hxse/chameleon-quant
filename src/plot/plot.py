@@ -176,16 +176,6 @@ def add_indicator(fig, df, plot_params=None):
             line_dash="dashed",
         )
 
-    if "test_index_start" in plot_params and plot_params["test_index_start"]:
-        dst_end = Span(
-            location=plot_params["test_index_start"],
-            dimension="height",
-            line_color="green",
-            line_width=6,
-            line_alpha=0.6,
-        )
-        fig.add_layout(dst_end)
-
 
 def add_hover(fig, df):
     source = ColumnDataSource(data=df)
@@ -306,6 +296,59 @@ def line_plot(
     return [fig, ["rsi"]]
 
 
+def add_total(fig, df, plot_params, side_arr=[]):
+
+    if (
+        "merge_total" in side_arr
+        and plot_params
+        and "long_count" in plot_params
+        and plot_params["long_count"] > 0
+        and "short_count" in plot_params
+        and plot_params["short_count"] > 0
+    ):
+
+        fig.line(
+            "index",
+            "merge_total",
+            source=df,
+            line_width=2,
+            line_alpha=1,
+            line_color="black",
+            visible=True,
+        )
+
+    if (
+        "long_total" in side_arr
+        and plot_params
+        and "long_count" in plot_params
+        and plot_params["long_count"] > 0
+    ):
+        fig.line(
+            "index",
+            "long_total",
+            source=df,
+            line_width=2,
+            line_alpha=1,
+            line_color="green",
+            visible=True,
+        )
+    if (
+        "short_total" in side_arr
+        and plot_params
+        and "short_count" in plot_params
+        and plot_params["short_count"] > 0
+    ):
+        fig.line(
+            "index",
+            "short_total",
+            source=df,
+            line_width=2,
+            line_alpha=1,
+            line_color="red",
+            visible=True,
+        )
+
+
 def backtest_plot(
     df, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
 ):
@@ -319,42 +362,68 @@ def backtest_plot(
         height=int(height * height_scale),
     )
 
-    if (
-        plot_params
-        and "long_count" in plot_params
-        and plot_params["long_count"] > 0
-        and "short_count" in plot_params
-        and plot_params["short_count"] > 0
-    ):
-        fig.line(
-            "index",
-            "merge_total",
-            source=df,
-            line_width=2,
-            line_alpha=1,
-            line_color="black",
-            visible=True,
+    if "split_array" not in plot_params:
+        add_total(
+            fig, df, plot_params, side_arr=["merge_total", "long_total", "short_total"]
         )
-    if plot_params and "long_count" in plot_params and plot_params["long_count"] > 0:
-        fig.line(
-            "index",
-            "long_total",
-            source=df,
-            line_width=2,
-            line_alpha=1,
-            line_color="green",
-            visible=True,
-        )
-    if plot_params and "short_count" in plot_params and plot_params["short_count"] > 0:
-        fig.line(
-            "index",
-            "short_total",
-            source=df,
-            line_width=2,
-            line_alpha=1,
-            line_color="red",
-            visible=True,
-        )
+    elif "split_array" in plot_params and len(plot_params["split_array"]) > 0:
+        for _df, _split_dict in plot_params["split_array"]:
+            train_stop = _split_dict["train_stop"]
+            valid_start = _split_dict["valid_start"]
+            valid_stop = _split_dict["valid_stop"]
+            test_start = _split_dict["test_start"]
+            test_stop = _split_dict["test_stop"]
+
+            source = ColumnDataSource(data=_df)
+
+            if len(plot_params["split_array"]) == 1:
+                add_total(
+                    fig,
+                    _df,
+                    plot_params,
+                    side_arr=["merge_total", "long_total", "short_total"],
+                )
+                dst_end = Span(
+                    location=train_stop,
+                    dimension="height",
+                    line_color="green",
+                    line_width=6,
+                    line_alpha=0.6,
+                )
+                fig.add_layout(dst_end)
+
+                dst_end = Span(
+                    location=valid_stop,
+                    dimension="height",
+                    line_color="green",
+                    line_width=6,
+                    line_alpha=0.6,
+                )
+                fig.add_layout(dst_end)
+            elif len(plot_params["split_array"]) > 1:
+                add_total(fig, _df, plot_params, side_arr=["merge_total"])
+
+                source = ColumnDataSource(data=_df[valid_start:valid_stop])
+                fig.line(
+                    "index",
+                    "merge_total",
+                    source=source,
+                    line_width=2.5,
+                    line_alpha=1,
+                    line_color="orange",
+                    visible=True,
+                )
+
+                source = ColumnDataSource(data=_df[test_start:test_stop])
+                fig.line(
+                    "index",
+                    "merge_total",
+                    source=source,
+                    line_width=3,
+                    line_alpha=1,
+                    line_color="yellow",
+                    visible=True,
+                )
 
     return [fig, ["merge_total", "long_total", "short_total"]]
 

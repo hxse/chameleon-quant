@@ -5,8 +5,7 @@ from data_api.data_api import (
     get_data_wapper,
     test_data,
     init_data,
-    split_data,
-    get_test_index,
+    get_split_idx,
 )
 
 from backtest.backtest import run_backtest_warp
@@ -30,6 +29,36 @@ def get_plot_config(df):
     return plot_config
 
 
+def get_optuna(train_df, strategy, strategy_params, optuna_params):
+    study = optuna.create_study(
+        # storage="sqlite:///optuna_db/db.sqlite3",
+        # study_name="test",
+    )
+    func = optuna_wrapper(
+        train_df,
+        strategy,
+        strategy_params=strategy_params,
+        optuna_params=optuna_params,
+    )
+    study.optimize(func, n_trials=strategy_params.get("n_trials", 50))
+    print(f"Best value: {study.best_value} (params: {study.best_params})")
+    return study
+
+
+def get_result(df, strategy, strategy_params, study):
+    strategy_params = {**strategy_params, **study.best_params}
+    strategy(df, strategy_params)
+    result = run_backtest_warp(
+        df,
+        atr_sl=strategy_params.get("atr_sl", 0),
+        atr_tp=strategy_params.get("atr_tp", 0),
+        atr_tsl=strategy_params.get("atr_tsl", 0),
+        sltp_limit=strategy_params.get("sltp_limit", True),
+        tsl_pole=strategy_params.get("tsl_pole", True),
+    )
+    return result
+
+
 def backtest_wapper(
     df,
     strategy,
@@ -45,6 +74,7 @@ def backtest_wapper(
     """
 
     if not optimize_mode:
+        df = df.copy()
         strategy(df, strategy_params)
         result = run_backtest_warp(
             df,
@@ -63,37 +93,35 @@ def backtest_wapper(
             height=400,
             plot_params={**strategy_params, **result},
         )
-        return [exchange, df, result, fig, None]
+        return [exchange, df, result, fig, {}]
     else:
-        train_df = split_data(df, ratio=strategy_params.get("ratio", 0.3), copy=True)
-        test_index_dict = get_test_index(df, train_df)
+        split_dict = get_split_idx(df, strategy_params.get("ratio", 0.2))
+        train_start = split_dict["train_start"]
+        train_stop = split_dict["train_stop"]
+        valid_stop = split_dict["valid_stop"]
+        test_stop = split_dict["test_stop"]
 
-        study = optuna.create_study(
-            # storage="sqlite:///optuna_db/db.sqlite3",
-            # study_name="test",
-        )
-        func = optuna_wrapper(
-            train_df,
-            strategy,
-            strategy_params=strategy_params,
-            optuna_params=optuna_params,
-        )
-        study.optimize(func, n_trials=strategy_params.get("n_trials", 50))
-        print(f"Best value: {study.best_value} (params: {study.best_params})")
+        res_arr = []
+        for i in range(strategy_params.get("o_trials", 3)):
+            train_df = df[train_start:train_stop].copy()
+            study = get_optuna(train_df, strategy, strategy_params, optuna_params)
 
-        strategy_params = {**strategy_params, **study.best_params}
+            train_valid_df = df[train_start:valid_stop].copy()
+            result = get_result(train_valid_df, strategy, strategy_params, study)
 
-        strategy(df, strategy_params)
+            res_arr.append(
+                {
+                    "result": result,
+                    "study": study,
+                }
+            )
 
-        result = run_backtest_warp(
-            df,
-            atr_sl=strategy_params.get("atr_sl", 0),
-            atr_tp=strategy_params.get("atr_tp", 0),
-            atr_tsl=strategy_params.get("atr_tsl", 0),
-            sltp_limit=strategy_params.get("sltp_limit", True),
-            tsl_pole=strategy_params.get("tsl_pole", True),
-        )
+        res_arr.sort(key=lambda x: -x["result"]["total"])
+        train_study = res_arr[0]["study"]
+        valid_result = res_arr[0]["result"]
 
+        df = df[train_start:test_stop].copy()
+        result = get_result(df, strategy, strategy_params, train_study)
         plot_config = get_plot_config(df)
 
         fig = layout_plot(
@@ -101,9 +129,24 @@ def backtest_wapper(
             plot_config,
             width=800,
             height=400,
-            plot_params={**test_index_dict, **result, **strategy_params},
+            plot_params={
+                "split_array": [[df, split_dict]],
+                **result,
+                **strategy_params,
+            },
         )
-        return [exchange, df, result, fig, study]
+        return [
+            exchange,
+            df,
+            result,
+            fig,
+            {
+                "train_study": train_study,
+                "valid_result": valid_result,
+                "split_dict": split_dict,
+                "res_arr": res_arr,
+            },
+        ]
 
 
 def test():
