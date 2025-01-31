@@ -224,6 +224,7 @@ def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75
         x_axis_type="datetime",
         width=int(width * width_scale),
         height=int(height * height_scale),
+        output_backend="webgl",
     )
 
     inc = df.close > df.open
@@ -281,6 +282,7 @@ def line_plot(
         x_axis_type="datetime",
         width=int(width * width_scale),
         height=int(height * height_scale),
+        output_backend="webgl",
     )
     if "rsi" in df.columns:
         fig.line(
@@ -360,6 +362,7 @@ def backtest_plot(
         x_axis_type="datetime",
         width=int(width * width_scale),
         height=int(height * height_scale),
+        output_backend="webgl",
     )
 
     if "split_array" not in plot_params:

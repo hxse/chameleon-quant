@@ -288,6 +288,7 @@ def callback(_p, strategy, config_path, csv_dir):
 def init_log(path):
     data = {
         "last_minute_5": None,
+        "last_minute_15": None,
         "last_minute_30": None,
         "last_hour_1": None,
         "last_hour_4": None,
@@ -346,6 +347,16 @@ def loop_time(
             log_data["last_minute_5"] = now.minute
             print(iso_time(now), "last_minute_5")
             callback("5m", strategy, config_path, csv_dir)
+            dump_log(log_path, log_data)
+            get_memory()
+        if (
+            now.second >= delay
+            and now.minute % 15 == 0
+            and log_data["last_minute_15"] != now.minute
+        ):
+            log_data["last_minute_15"] = now.minute
+            print(iso_time(now), "last_minute_15")
+            callback("15m", strategy, config_path, csv_dir)
             dump_log(log_path, log_data)
             get_memory()
         if (
