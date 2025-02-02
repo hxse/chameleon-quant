@@ -55,6 +55,7 @@ exchange_dict = {}
 def run_strategy(signal_time, _name, _s, config_path, csv_dir):
     # count_mode = True
     count_mode = False
+    optimize_mode = "backtest"
 
     period = _s.strategy_params["period"]
     account = _s.strategy_params["account"]
@@ -79,8 +80,7 @@ def run_strategy(signal_time, _name, _s, config_path, csv_dir):
             df,
             strategy=_s.strategy,
             strategy_params=_s.strategy_params,
-            optimize_mode=False,
-            count_mode=count_mode,
+            optimize_mode=optimize_mode,
             exchange=exchange,
         )
         print("run strategy %s second" % (time.time() - start_time))
