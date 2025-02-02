@@ -4,7 +4,7 @@ from backtest.backtest_long import run_long
 from backtest.backtest_short import run_short
 
 
-@numba.njit
+@numba.jit(nopython=True, cache=True)
 def run_backtest(
     index_list,
     open_list,

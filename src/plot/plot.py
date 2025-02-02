@@ -218,7 +218,7 @@ def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75
 
     fig = figure(
         sizing_mode="scale_width",
-        tools="xpan,xwheel_zoom,undo,redo,reset,save",  # crosshair
+        tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
         active_scroll="xwheel_zoom",
         x_axis_type="datetime",
@@ -276,7 +276,7 @@ def line_plot(
 ):
     fig = figure(
         sizing_mode="scale_width",
-        tools="xpan,xwheel_zoom,undo,redo,reset,save",  # crosshair
+        tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
         active_scroll="xwheel_zoom",
         x_axis_type="datetime",
@@ -356,7 +356,7 @@ def backtest_plot(
 ):
     fig = figure(
         sizing_mode="scale_width",
-        tools="xpan,xwheel_zoom,undo,redo,reset,save",  # crosshair
+        tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
         active_scroll="xwheel_zoom",
         x_axis_type="datetime",
@@ -365,70 +365,116 @@ def backtest_plot(
         output_backend="webgl",
     )
 
-    if "split_array" not in plot_params:
+    if not ("split_dict" in plot_params and len(plot_params["split_dict"].keys()) > 0):
         add_total(
             fig, df, plot_params, side_arr=["merge_total", "long_total", "short_total"]
         )
-    elif "split_array" in plot_params and len(plot_params["split_array"]) > 0:
-        for _df, _split_dict in plot_params["split_array"]:
-            train_stop = _split_dict["train_stop"]
-            valid_start = _split_dict["valid_start"]
-            valid_stop = _split_dict["valid_stop"]
-            test_start = _split_dict["test_start"]
-            test_stop = _split_dict["test_stop"]
+    else:
+        split_dict = plot_params["split_dict"]
+        train_stop = split_dict["train_stop"]
+        valid_start = split_dict["valid_start"]
+        valid_stop = split_dict["valid_stop"]
+        test_start = split_dict["test_start"]
+        test_stop = split_dict["test_stop"]
 
-            source = ColumnDataSource(data=_df)
+        source = ColumnDataSource(data=df)
 
-            if len(plot_params["split_array"]) == 1:
-                add_total(
-                    fig,
-                    _df,
-                    plot_params,
-                    side_arr=["merge_total", "long_total", "short_total"],
-                )
-                dst_end = Span(
-                    location=train_stop,
-                    dimension="height",
-                    line_color="green",
-                    line_width=6,
-                    line_alpha=0.6,
-                )
-                fig.add_layout(dst_end)
+        if plot_params.get("span_mode", True):
+            add_total(
+                fig,
+                df,
+                plot_params,
+                side_arr=["merge_total", "long_total", "short_total"],
+            )
+            dst_end = Span(
+                location=train_stop,
+                dimension="height",
+                line_color="green",
+                line_width=6,
+                line_alpha=0.6,
+            )
+            fig.add_layout(dst_end)
 
-                dst_end = Span(
-                    location=valid_stop,
-                    dimension="height",
-                    line_color="green",
-                    line_width=6,
-                    line_alpha=0.6,
-                )
-                fig.add_layout(dst_end)
-            elif len(plot_params["split_array"]) > 1:
-                add_total(fig, _df, plot_params, side_arr=["merge_total"])
+            dst_end = Span(
+                location=valid_stop,
+                dimension="height",
+                line_color="green",
+                line_width=6,
+                line_alpha=0.6,
+            )
+            fig.add_layout(dst_end)
+        else:
+            add_total(fig, df, plot_params, side_arr=["merge_total"])
 
-                source = ColumnDataSource(data=_df[valid_start:valid_stop])
-                fig.line(
-                    "index",
-                    "merge_total",
-                    source=source,
-                    line_width=2.5,
-                    line_alpha=1,
-                    line_color="orange",
-                    visible=True,
-                )
+            source = ColumnDataSource(data=df[valid_start:valid_stop])
+            fig.line(
+                "index",
+                "merge_total",
+                source=source,
+                line_width=2.5,
+                line_alpha=1,
+                line_color="orange",
+                visible=True,
+            )
 
-                source = ColumnDataSource(data=_df[test_start:test_stop])
-                fig.line(
-                    "index",
-                    "merge_total",
-                    source=source,
-                    line_width=3,
-                    line_alpha=1,
-                    line_color="yellow",
-                    visible=True,
-                )
+            source = ColumnDataSource(data=df[test_start:test_stop])
+            fig.line(
+                "index",
+                "merge_total",
+                source=source,
+                line_width=3,
+                line_alpha=1,
+                line_color="yellow",
+                visible=True,
+            )
 
     return [fig, ["merge_total", "long_total", "short_total"]]
+
+
+def total_line(
+    arr,
+    plot_config,
+    width=800,
+    height=450,
+    plot_params=None,
+):
+
+    for i in plot_config:
+        if i["name"] == "backtest":
+            height_scale = i["height_scale"]
+            fig = figure(
+                sizing_mode="scale_width",
+                tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
+                active_drag="xpan",
+                active_scroll="xwheel_zoom",
+                x_axis_type="datetime",
+                width=int(width),
+                height=int(height * height_scale),
+                output_backend="webgl",
+            )
+
+            color_arr = [
+                "red",
+                "orange",
+                "yellow",
+                "green",
+                "cyan",
+                "blue",
+                "purple",
+                "gray",
+            ]
+            for k, v in enumerate(arr):
+                df = v["test_df"]
+                fig.line(
+                    "origin_index",
+                    "merge_total",
+                    source=df,
+                    line_width=2,
+                    line_alpha=1,
+                    line_color=color_arr[k] if k < len(color_arr) else "black",
+                    visible=True,
+                )
+    return column([fig], sizing_mode="scale_width", width=width, height=height)
 
 
 def layout_plot(

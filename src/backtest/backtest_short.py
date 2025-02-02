@@ -2,7 +2,7 @@ import numba
 import numpy as np
 
 
-@numba.njit
+@numba.jit(nopython=True, cache=True)
 def run_short(
     _array,
     index_list,

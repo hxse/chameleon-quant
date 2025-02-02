@@ -19,6 +19,9 @@ dependencies = [
     "uvicorn>=0.34.0",
     "pandas-ta>=0.3.14b0",
     "ccxt>=4.4.50",
+    "tqdm>=4.67.1",
+    "ipywidgets>=8.1.5",
+    "pathos>=0.3.3",
 ]
 
 

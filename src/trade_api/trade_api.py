@@ -11,6 +11,7 @@ amount_dict = {
         "DOGE/USDT": {"minimum": 14, "round": 0},
         "XRP/USDT": {"minimum": 1.8, "round": 1},
         "TRUMP/USDT": {"minimum": 0.13, "round": 2},
+        "SOL/USDT": {"minimum": 1, "round": 0},
     }
 }
 
