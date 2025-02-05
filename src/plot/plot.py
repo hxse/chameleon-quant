@@ -73,6 +73,18 @@ def add_indicator(fig, df, plot_params=None):
             visible=True,
         )
 
+    color = ["orange", "purple"]
+    for k, v in enumerate([i for i in df.columns if ("st_" in i)]):
+        fig.line(
+            "index",
+            v,
+            source=source,
+            line_width=2,
+            line_alpha=1,
+            line_color=color[k] if k < len(color) else color[len(color) - 1],
+            visible=True,
+        )
+
     for i in df.columns:
         for c in ["CM"]:
             if c in i:
