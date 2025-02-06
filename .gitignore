@@ -3,6 +3,7 @@ csv/
 fig_data/
 strategy/
 study_ipynb/
+anywidget_demo/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
