@@ -10,7 +10,7 @@ from data_api.data_api import (
 
 from backtest.backtest import run_backtest_warp
 
-from plot.plot import layout_plot, total_line
+from plot.bokeh_plot import layout_plot, total_line
 
 import optuna
 from optimize.run_optuna import optuna_wrapper
@@ -268,14 +268,21 @@ def backtest_wapper(
         )
         plot_config = get_plot_config(df)
 
+        plot_params = {**strategy_params, **result}
         fig = layout_plot(
             df,
             plot_config,
             width=800,
             height=400,
-            plot_params={**strategy_params, **result},
+            plot_params=plot_params,
         )
-        return [exchange, df, result, fig, {}]
+        return [
+            exchange,
+            df,
+            result,
+            fig,
+            {"plot_config": plot_config, "plot_params": plot_params},
+        ]
 
     elif optimize_mode == "forward_testing":
         df = df.copy()

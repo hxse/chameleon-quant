@@ -19,6 +19,17 @@ def time_decorate(name):
     return time_decorator
 
 
+def convert_np2json(_dict):
+    for k, v in _dict.items():
+        if "numpy.int64" in str(type(v)):
+            _dict[k] = int(v)
+        if "numpy.float64" in str(type(v)):
+            _dict[k] = float(v)
+        if "numpy.bool_" in str(type(v)):
+            _dict[k] = bool(v)
+    _dict["func_arr"] = []
+
+
 def get_fig_path(csv_path, dir_name="fig_data"):
     """
     根据csv_path拼接fig_path
@@ -30,7 +41,7 @@ def get_fig_path(csv_path, dir_name="fig_data"):
 
 
 @time_decorate("save fig done ")
-def save_fig_file(fig, config_path, csv_path):
+def save_fig_file(fig, config_path, csv_path, _):
     if csv_path:
         fig_path = get_fig_path(csv_path)
         fig_path.parent.mkdir(parents=True, exist_ok=True)
@@ -40,6 +51,33 @@ def save_fig_file(fig, config_path, csv_path):
     save(fig, fig_path)
     print("html文件已存档", fig_path)
     return fig_path
+
+
+@time_decorate("save df done ")
+def save_df_file(df, config_path, csv_path, _):
+    if csv_path:
+        df_path = get_fig_path(csv_path)
+        df_path = df_path.parent / (df_path.stem + ".csv")
+        df_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        df_path = (Path(config_path).parent) / "df.csv"
+
+    filepath = Path(df_path)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    df.to_csv(df_path, index=False)
+
+    _c = {
+        "time": int(df.iloc[-1]["time"]),
+        "plot_config": _["plot_config"],
+        "plot_params": _["plot_params"],
+    }
+    convert_np2json(_c["plot_params"])
+    with open(df_path.parent / (df_path.stem + ".json"), "w", encoding="utf-8") as file:
+        json.dump(_c, file, ensure_ascii=False, indent=4)
+
+    print("df csv文件已存档", df_path)
+    return df_path
 
 
 def push_telegram_channel(config_path, data, fig=None, fig_path="", send_html=False):

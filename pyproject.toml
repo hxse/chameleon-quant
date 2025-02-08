@@ -5,7 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = "==3.10.*"
 dependencies = [
-    "bokeh>=3.6.2",
+    "bokeh>=3.6.3",
+
     "bokeh-sampledata>=2024.2",
     "ipykernel>=6.29.5",
     "numba>=0.60.0",

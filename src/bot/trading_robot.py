@@ -14,7 +14,7 @@ sys.path.append("src")
 from data_api.data_api import get_data_wapper
 from backtest.backtest_framework import backtest_wapper
 from trade_api.trade_api import trade_api_wapper, get_ticker
-from telegram_bot.telegram_bot import push_telegram_channel, save_fig_file
+from telegram_bot.telegram_bot import push_telegram_channel, save_fig_file, save_df_file
 
 
 zone = datetime.timezone.utc
@@ -278,7 +278,8 @@ def callback(_p, strategy, config_path, csv_dir):
                 _,
                 csv_path,
             ] = res
-            fig_path = save_fig_file(fig, config_path, csv_path)
+            fig_path = save_fig_file(fig, config_path, csv_path, _)
+            df_path = save_df_file(df, config_path, csv_path, _)
             run_trade_api(
                 exchange, strategy_params, df, result, fig, config_path, fig_path
             )
