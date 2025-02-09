@@ -10,7 +10,7 @@ from data_api.data_api import (
 
 from backtest.backtest import run_backtest_warp
 
-from plot.bokeh_plot import layout_plot, total_line
+from plot.bokeh_plot import layout_plot, total_line, get_df_dict
 
 import optuna
 from optimize.run_optuna import optuna_wrapper
@@ -61,18 +61,15 @@ def get_backtest_fig(
     split_dict={},
     span_mode=True,
 ):
-
+    plot_params = {
+        "split_dict": split_dict,
+        "span_mode": span_mode,
+        **result,
+        **strategy_params,
+    }
+    df_dict = get_df_dict(df, plot_params=plot_params)
     fig = layout_plot(
-        df,
-        plot_config,
-        width=800,
-        height=400,
-        plot_params={
-            "split_dict": split_dict,
-            "span_mode": span_mode,
-            **result,
-            **strategy_params,
-        },
+        df_dict, plot_config, width=800, height=400, plot_params=plot_params
     )
     return fig
 
@@ -269,8 +266,9 @@ def backtest_wapper(
         plot_config = get_plot_config(df)
 
         plot_params = {**strategy_params, **result}
+        df_dict = get_df_dict(df)
         fig = layout_plot(
-            df,
+            df_dict,
             plot_config,
             width=800,
             height=400,

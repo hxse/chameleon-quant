@@ -15,7 +15,43 @@ from bokeh.layouts import gridplot, column
 from bokeh.models.ranges import DataRange1d
 
 
-def add_indicator(fig, df, plot_params=None):
+def get_df_dict(df, plot_params={}):
+    _df = df[["time", "date", "open", "high", "low", "close"]]
+    _c = ~_df.columns.isin(["time", "date"])
+    df_inc = _df.copy()
+    df_inc.loc[df_inc.close <= df_inc.open, _c] = np.nan
+    df_dec = _df.copy()
+    df_dec.loc[df_dec.close > df_dec.open, _c] = np.nan
+
+    source_df = ColumnDataSource(data=df)
+    source_inc = ColumnDataSource(data=df_inc)
+    source_dec = ColumnDataSource(data=df_dec)
+
+    _ = {}
+    if "split_dict" in plot_params and len(plot_params["split_dict"].keys()) > 0:
+        split_dict = plot_params["split_dict"]
+        train_stop = split_dict["train_stop"]
+        valid_start = split_dict["valid_start"]
+        valid_stop = split_dict["valid_stop"]
+        test_start = split_dict["test_start"]
+        test_stop = split_dict["test_stop"]
+        source_valid = ColumnDataSource(data=df[valid_start:valid_stop])
+        source_test = ColumnDataSource(data=df[test_start:test_stop])
+        _["source_valid"] = source_valid
+        _["source_test"] = source_test
+    source_plot = get_source_plot(df)
+    return {
+        "df": df,
+        "source_df": source_df,
+        "source_inc": source_inc,
+        "source_dec": source_dec,
+        "source_plot": source_plot,
+        **_,
+    }
+
+
+def get_source_plot(df):
+    df = df.copy()
     df["_long_price"] = df["long_price"]
     df.loc[df["long_status"] == 2, "_long_price"] = np.nan
     df["_long_price"] = df["_long_price"].interpolate(method="linear")
@@ -26,8 +62,6 @@ def add_indicator(fig, df, plot_params=None):
     df["_short_price"] = df["_short_price"].interpolate(method="linear")
     df.loc[df["short_status"] == -1, "_short_price"] = np.nan
 
-    # inc = df.close > df.open
-    # dec = ~inc
     _arr = [
         ["long_price_even", "_long_price", "long_idx2", 0],
         ["long_price_odd", "_long_price", "long_idx2", 1],
@@ -54,19 +88,28 @@ def add_indicator(fig, df, plot_params=None):
     df.drop(["_long_price"], axis=1, inplace=True)
     df.drop(["_short_price"], axis=1, inplace=True)
 
+    # for i in _arr:
+    #     df.drop(i[0], axis=1, inplace=True)
     source = ColumnDataSource(data=df)
+    return source
+
+
+def add_indicator(fig, df_dict, plot_params=None):
+    df = df_dict["df"]
+    source_plot = df_dict["source_plot"]
+
+    # inc = df.close > df.open
+    # dec = ~inc
+
     # source_inc = ColumnDataSource(data=df[inc])
     # source_dec = ColumnDataSource(data=df[dec])
-
-    for i in _arr:
-        df.drop(i[0], axis=1, inplace=True)
 
     color = ["orange", "green", "blue", "purple", "grey"]
     for k, v in enumerate([i for i in df.columns if "ma" in i]):
         fig.line(
             "index",
             v,
-            source=source,
+            source=source_plot,
             line_width=2,
             line_alpha=1,
             line_color=color[k] if k < len(color) else color[len(color) - 1],
@@ -78,7 +121,7 @@ def add_indicator(fig, df, plot_params=None):
         fig.line(
             "index",
             v,
-            source=source,
+            source=source_plot,
             line_width=2,
             line_alpha=1,
             line_color=color[k] if k < len(color) else color[len(color) - 1],
@@ -92,7 +135,7 @@ def add_indicator(fig, df, plot_params=None):
                 fig.line(
                     "index",
                     f"{name}_{suffix}",
-                    source=source,
+                    source=source_plot,
                     line_width=2,
                     line_alpha=1,
                     line_color="grey",
@@ -105,7 +148,7 @@ def add_indicator(fig, df, plot_params=None):
                     base="index",
                     lower=f"CL_{suffix}" if name == "CU" else f"CL_{suffix}",
                     upper=f"CU_{suffix}" if name == "CU" else f"CU_{suffix}",
-                    source=source,
+                    source=source_plot,
                     fill_alpha=0.03,
                     fill_color="blue",
                     line_color="black",
@@ -123,7 +166,7 @@ def add_indicator(fig, df, plot_params=None):
         fig.line(
             "index",
             col_name,
-            source=source,
+            source=source_plot,
             line_width=12,
             line_alpha=0.7,
             line_color=color,
@@ -142,7 +185,7 @@ def add_indicator(fig, df, plot_params=None):
         fig.line(
             "index",
             col_name,
-            source=source,
+            source=source_plot,
             line_width=4,
             line_alpha=1,
             line_color=color,
@@ -161,7 +204,7 @@ def add_indicator(fig, df, plot_params=None):
         fig.line(
             "index",
             col_name,
-            source=source,
+            source=source_plot,
             line_width=4,
             line_alpha=1,
             line_color=color,
@@ -180,7 +223,7 @@ def add_indicator(fig, df, plot_params=None):
         fig.line(
             "index",
             col_name,
-            source=source,
+            source=source_plot,
             line_width=4,
             line_alpha=1,
             line_color=color,
@@ -189,10 +232,12 @@ def add_indicator(fig, df, plot_params=None):
         )
 
 
-def add_hover(fig, df):
-    source = ColumnDataSource(data=df)
+def add_hover(fig, df_dict):
+    df = df_dict["df"]
+    source_df = df_dict["source_df"]
+    # source = ColumnDataSource(data=df)
     close_line = fig.line(
-        "index", "close", source=source, line_width=2, line_alpha=0, visible=True
+        "index", "close", source=source_df, line_width=2, line_alpha=0, visible=True
     )
     tooltips = [
         ("y", "$y"),
@@ -219,7 +264,7 @@ def add_hover(fig, df):
     fig.add_tools(hover)
 
 
-def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75):
+def candlestick_plot(df_dict, width=800, height=400, width_scale=1, height_scale=0.75):
     """
     DataFrame 参考格式:
         date	open	high	low	close	volume
@@ -228,7 +273,12 @@ def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75
     2	2000-03-03	94.75	98.87	93.87	96.12	101435200
     """
 
+    source_df = df_dict["source_df"]
+    source_inc = df_dict["source_inc"]
+    source_dec = df_dict["source_dec"]
+
     fig = figure(
+        name="candle_plot",
         sizing_mode="scale_width",
         tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
@@ -239,12 +289,12 @@ def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75
         output_backend="webgl",
     )
 
-    inc = df.close > df.open
-    dec = ~inc
+    # inc = df.close > df.open
+    # dec = ~inc
 
-    source = ColumnDataSource(data=df)
-    source_inc = ColumnDataSource(data=df[inc])
-    source_dec = ColumnDataSource(data=df[dec])
+    # source = ColumnDataSource(data=df)
+    # source_inc = ColumnDataSource(data=df[inc])
+    # source_dec = ColumnDataSource(data=df[dec])
 
     fig.segment(
         "index",
@@ -284,9 +334,13 @@ def candlestick_plot(df, width=800, height=400, width_scale=1, height_scale=0.75
 
 
 def line_plot(
-    df, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
+    df_dict, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
 ):
+    df = df_dict["df"]
+    source_df = df_dict["source_df"]
+
     fig = figure(
+        name="rsi_plot",
         sizing_mode="scale_width",
         tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
@@ -300,7 +354,7 @@ def line_plot(
         fig.line(
             "index",
             "rsi",
-            source=df,
+            source=source_df,
             line_width=2,
             line_alpha=1,
             line_color="green",
@@ -364,9 +418,12 @@ def add_total(fig, df, plot_params, side_arr=[]):
 
 
 def backtest_plot(
-    df, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
+    df_dict, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
 ):
+    source_df = df_dict["source_df"]
+
     fig = figure(
+        name="backtest_plot",
         sizing_mode="scale_width",
         tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
@@ -379,7 +436,10 @@ def backtest_plot(
 
     if not ("split_dict" in plot_params and len(plot_params["split_dict"].keys()) > 0):
         add_total(
-            fig, df, plot_params, side_arr=["merge_total", "long_total", "short_total"]
+            fig,
+            source_df,
+            plot_params,
+            side_arr=["merge_total", "long_total", "short_total"],
         )
     else:
         split_dict = plot_params["split_dict"]
@@ -389,12 +449,12 @@ def backtest_plot(
         test_start = split_dict["test_start"]
         test_stop = split_dict["test_stop"]
 
-        source = ColumnDataSource(data=df)
+        # source = ColumnDataSource(data=df_dict)
 
         if plot_params.get("span_mode", True):
             add_total(
                 fig,
-                df,
+                source_df,
                 plot_params,
                 side_arr=["merge_total", "long_total", "short_total"],
             )
@@ -416,24 +476,28 @@ def backtest_plot(
             )
             fig.add_layout(dst_end)
         else:
-            add_total(fig, df, plot_params, side_arr=["merge_total"])
 
-            source = ColumnDataSource(data=df[valid_start:valid_stop])
+            source_valid = df_dict["source_valid"]
+            source_test = df_dict["source_test"]
+            add_total(fig, source_df, plot_params, side_arr=["merge_total"])
+
+            # source = ColumnDataSource(data=df_dict[valid_start:valid_stop])
+
             fig.line(
                 "index",
                 "merge_total",
-                source=source,
+                source=source_valid,
                 line_width=2.5,
                 line_alpha=1,
                 line_color="orange",
                 visible=True,
             )
 
-            source = ColumnDataSource(data=df[test_start:test_stop])
+            # source = ColumnDataSource(data=df_dict[test_start:test_stop])
             fig.line(
                 "index",
                 "merge_total",
-                source=source,
+                source=source_test,
                 line_width=3,
                 line_alpha=1,
                 line_color="yellow",
@@ -455,6 +519,7 @@ def total_line(
         if i["name"] == "backtest":
             height_scale = i["height_scale"]
             fig = figure(
+                name="total_plot",
                 sizing_mode="scale_width",
                 tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
                 active_drag="xpan",
@@ -490,12 +555,13 @@ def total_line(
 
 
 def layout_plot(
-    df,
+    df_dict,
     plot_config,
     width=800,
     height=450,
     plot_params=None,
 ):
+    df = df_dict["df"]
     fig_array = []
     columns_array = []
     for i in plot_config:
@@ -503,7 +569,7 @@ def layout_plot(
             continue
         if i["name"] == "candle":
             _f = candlestick_plot(
-                df,
+                df_dict,
                 width=width,
                 height=height,
                 height_scale=i["height_scale"],
@@ -512,7 +578,7 @@ def layout_plot(
             columns_array.append(_f[1])
         elif i["name"] == "backtest":
             _f = backtest_plot(
-                df,
+                df_dict,
                 width=width,
                 height=height,
                 height_scale=i["height_scale"],
@@ -522,7 +588,7 @@ def layout_plot(
             columns_array.append(_f[1])
         else:
             _f = line_plot(
-                df,
+                df_dict,
                 width=width,
                 height=height,
                 height_scale=i["height_scale"],
@@ -533,10 +599,10 @@ def layout_plot(
 
     fig_first = fig_array[0]
     x_range = create_x_range(
-        fig_first, df, fig_array=fig_array, columns_array=columns_array
+        fig_first, df_dict, fig_array=fig_array, columns_array=columns_array
     )
-    add_indicator(fig_first, df, plot_params=plot_params)
-    add_hover(fig_first, df)
+    add_indicator(fig_first, df_dict, plot_params=plot_params)
+    add_hover(fig_first, df_dict)
 
     for i in fig_array[:-1]:
         i.xaxis.visible = False
@@ -566,13 +632,15 @@ def layout_plot(
     return column(fig_array, sizing_mode="scale_width", width=width, height=height)
 
 
-def create_x_range(fig, df, fig_array=[], columns_array=[]):
+def create_x_range(fig, df_dict, fig_array=[], columns_array=[]):
+    source_df = df_dict["source_df"]
+
     common_x_range = DataRange1d(bounds=None)
-    source = ColumnDataSource(data=df)
+    # source = ColumnDataSource(data=df_dict)
     callback = CustomJS(
         args={
             "fig": fig,
-            "source": source,
+            "source": source_df,
             "fig_array": fig_array,
             "columns_array": columns_array,
         },
