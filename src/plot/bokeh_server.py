@@ -1,4 +1,3 @@
-import colorcet as cc
 from bokeh.server.server import Server
 from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
