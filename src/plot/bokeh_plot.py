@@ -105,6 +105,19 @@ def add_indicator(fig, df_dict, plot_params=None):
     # source_dec = ColumnDataSource(data=df[dec])
 
     color = ["orange", "green", "blue", "purple", "grey"]
+    for k, v in enumerate([i for i in df.columns if "linreg" in i]):
+        fig.line(
+            "index",
+            v,
+            source=source_plot,
+            line_width=2,
+            line_alpha=1,
+            line_color=color[k] if k < len(color) else color[len(color) - 1],
+            visible=True,
+            # line_dash="dotted",
+        )
+
+    color = ["orange", "green", "blue", "purple", "grey"]
     for k, v in enumerate([i for i in df.columns if "ma" in i]):
         fig.line(
             "index",
