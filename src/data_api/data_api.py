@@ -127,16 +127,22 @@ def test_data(df, config, strategy_params):
     assert _ == period_dict[period] * 60 * 1000, "发现数据间隔不对"
 
 
-def test_connect_api(config, strategy_params):
-    exchange = connect_api(config, strategy_params)
-    balance_obj = get_balance(exchange)
-    print(balance_obj["total"])  # 总资产数量
+def test_connect_api(config, strategy_params, sleep=60):
+    try:
+        exchange = connect_api(config, strategy_params)
+        balance_obj = get_balance(exchange)
+        print(balance_obj["total"])  # 总资产数量
 
-    print("USDT", balance_obj.get("USDT", {}))
-    # print("BTC", balance_obj.get("BTC", {}))
-    # print("ETH", balance_obj.get("ETH", {}))
-    # print("DOGE", balance_obj.get("DOGE", {}))
-    return exchange
+        print("USDT", balance_obj.get("USDT", {}))
+        # print("BTC", balance_obj.get("BTC", {}))
+        # print("ETH", balance_obj.get("ETH", {}))
+        # print("DOGE", balance_obj.get("DOGE", {}))
+        return exchange
+    except Exception as e:
+        print(e)
+        print("sleep...", sleep)
+        time.sleep(sleep)
+        raise RuntimeError(e)
 
 
 def handle_data(
