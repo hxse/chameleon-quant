@@ -57,7 +57,6 @@ def make_document(df_path, cf_path, name, sleep=1000 * 15, test=False):
             plot_arr = [i for i in p2.select(dict(name="candle_plot"))]
             if len(plot_arr) > 0:
                 x_end = source_df.data["index"][-1]
-                print(x_end, plot_arr[0].x_range.end)
                 if x_end - plot_arr[0].x_range.end < 10:
                     plot_arr[0].x_range.end = x_end + offset
 
@@ -165,6 +164,11 @@ def make_document(df_path, cf_path, name, sleep=1000 * 15, test=False):
                 data_source.stream(_data)
             patch_data(df_dict)
             change_range(df_dict["source_df"])
+            print(
+                "update",
+                df_dict["source_df"].data["time"][-1],
+                df_dict["source_df"].data["date"][-1],
+            )
 
         button1 = Button(label="Run", button_type="success", width=390)
         button1.on_click(button1_run)
