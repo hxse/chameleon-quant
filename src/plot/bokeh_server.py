@@ -34,6 +34,62 @@ def get_route_name(i):
     return (" ".join([*i.parts[-4:-1], i.stem])).replace(" ", "_")
 
 
+def patch_data(df_dict):
+    arr = [
+        "long_price_even",
+        "long_price_odd",
+        "short_price_even",
+        "short_price_odd",
+    ]
+    for i in arr:
+
+        if "long" in i and df_dict["source_plot"].data["long_status"][-1] == 0:
+            name = None
+            if not np.isnan(df_dict["source_plot"].data[i][-1]):
+                name = i
+
+            if name:
+                source_plot_df = df_dict["source_plot"].to_df()
+                start = source_plot_df.loc[source_plot_df["long_status"] == 1].index[-1]
+                stop = source_plot_df.index[-1]
+
+                source_plot_df.loc[source_plot_df["long_status"] == 2, name] = np.nan
+                new_data = source_plot_df[name][start : stop + 1].interpolate(
+                    method="linear"
+                )
+                _new_data = new_data[:-1]
+                _c = list(zip(_new_data.index.tolist(), _new_data.tolist()))
+                df_dict["source_plot"].patch({name: _c})
+
+        if "short" in i and df_dict["source_plot"].data["short_status"][-1] == 0:
+            name = None
+            if not np.isnan(df_dict["source_plot"].data[i][-1]):
+                name = i
+
+            if name:
+                source_plot_df = df_dict["source_plot"].to_df()
+                start = source_plot_df.loc[source_plot_df["short_status"] == 1].index[
+                    -1
+                ]
+                stop = source_plot_df.index[-1]
+
+                source_plot_df.loc[source_plot_df["short_status"] == 2, name] = np.nan
+                new_data = source_plot_df[name][start : stop + 1].interpolate(
+                    method="linear"
+                )
+                _new_data = new_data[:-1]
+                _c = list(zip(_new_data.index.tolist(), _new_data.tolist()))
+                df_dict["source_plot"].patch({name: _c})
+
+
+def change_range(_p, source_df, offset=3):
+    plot_arr = [i for i in _p.select(dict(name="candle_plot"))]
+    if len(plot_arr) > 0:
+        x_end = source_df.data["index"][-1]
+        if x_end - plot_arr[0].x_range.end < 10:
+            plot_arr[0].x_range.end = x_end + offset
+
+
 def make_document(df_path, cf_path, name, sleep=1000 * 15, test=False):
     def _make_document(doc):
         nonlocal df_path, cf_path, name, sleep, test
@@ -51,70 +107,6 @@ def make_document(df_path, cf_path, name, sleep=1000 * 15, test=False):
         )
         # plot 2
         p2 = layout_plot(df_dict, cf["plot_config"], plot_params=cf["plot_params"])
-
-        def change_range(source_df, offset=3):
-            nonlocal p2, p1
-            plot_arr = [i for i in p2.select(dict(name="candle_plot"))]
-            if len(plot_arr) > 0:
-                x_end = source_df.data["index"][-1]
-                if x_end - plot_arr[0].x_range.end < 10:
-                    plot_arr[0].x_range.end = x_end + offset
-
-        def patch_data(df_dict):
-            arr = [
-                "long_price_even",
-                "long_price_odd",
-                "short_price_even",
-                "short_price_odd",
-            ]
-            for i in arr:
-
-                if "long" in i and df_dict["source_plot"].data["long_status"][-1] == 0:
-                    name = None
-                    if not np.isnan(df_dict["source_plot"].data[i][-1]):
-                        name = i
-
-                    if name:
-                        source_plot_df = df_dict["source_plot"].to_df()
-                        start = source_plot_df.loc[
-                            source_plot_df["long_status"] == 1
-                        ].index[-1]
-                        stop = source_plot_df.index[-1]
-
-                        source_plot_df.loc[source_plot_df["long_status"] == 2, name] = (
-                            np.nan
-                        )
-                        new_data = source_plot_df[name][start : stop + 1].interpolate(
-                            method="linear"
-                        )
-                        _new_data = new_data[:-1]
-                        _c = list(zip(_new_data.index.tolist(), _new_data.tolist()))
-                        df_dict["source_plot"].patch({name: _c})
-
-                if (
-                    "short" in i
-                    and df_dict["source_plot"].data["short_status"][-1] == 0
-                ):
-                    name = None
-                    if not np.isnan(df_dict["source_plot"].data[i][-1]):
-                        name = i
-
-                    if name:
-                        source_plot_df = df_dict["source_plot"].to_df()
-                        start = source_plot_df.loc[
-                            source_plot_df["short_status"] == 1
-                        ].index[-1]
-                        stop = source_plot_df.index[-1]
-
-                        source_plot_df.loc[
-                            source_plot_df["short_status"] == 2, name
-                        ] = np.nan
-                        new_data = source_plot_df[name][start : stop + 1].interpolate(
-                            method="linear"
-                        )
-                        _new_data = new_data[:-1]
-                        _c = list(zip(_new_data.index.tolist(), _new_data.tolist()))
-                        df_dict["source_plot"].patch({name: _c})
 
         def button1_run():
             nonlocal callback_obj
@@ -163,9 +155,10 @@ def make_document(df_path, cf_path, name, sleep=1000 * 15, test=False):
 
                 data_source.stream(_data)
             patch_data(df_dict)
-            change_range(df_dict["source_df"])
+            change_range(p2, df_dict["source_df"])
             print(
                 "update",
+                name,
                 df_dict["source_df"].data["time"][-1],
                 df_dict["source_df"].data["date"][-1],
             )
