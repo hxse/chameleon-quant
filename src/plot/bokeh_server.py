@@ -199,7 +199,7 @@ def main(dir_path, sleep=1000 * 15, test=False):
         apps,
         port=5006,
         allow_websocket_origin=["*"],
-        check_unused_sessions=1000 * 60 * 60 * 24 * 1.1,
+        check_unused_sessions=1000 * 30,
         unused_session_lifetime=1000 * 60 * 60 * 24,
         session_expiration_duration=1000 * 60 * 60 * 24 * 1.1,
         session_token_expiration=1000 * 60 * 60 * 24,
