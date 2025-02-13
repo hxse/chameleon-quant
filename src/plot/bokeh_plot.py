@@ -564,6 +564,31 @@ def total_line(
                     line_color=color_arr[k] if k < len(color_arr) else "black",
                     visible=True,
                 )
+
+            _l = []
+            for k, v in enumerate(arr):
+                test_start = v["split_dict"]["test_start"]
+                test_stop = v["split_dict"]["test_stop"]
+                _l.append(v["test_df"][test_start:test_stop])
+            new_ohlcv_df = _l[0].iloc[0:0].copy()
+            total = 0
+            for _df in _l[:]:
+                _df = _df.copy()
+                _df["merge_total"] = _df["merge_total"] - _df["merge_total"].iloc[0]
+                _df["merge_total"] = _df["merge_total"] + total
+                new_ohlcv_df = pd.concat([new_ohlcv_df, _df], axis=0, join="outer")
+                total = new_ohlcv_df.iloc[-1]["merge_total"]
+            new_ohlcv_df.reset_index(inplace=True, drop=True)
+            fig.line(
+                "origin_index",
+                "merge_total",
+                source=new_ohlcv_df,
+                line_width=2,
+                line_alpha=1,
+                line_color="black",
+                visible=True,
+            )
+
     return column([fig], sizing_mode="scale_width", width=width, height=height)
 
 

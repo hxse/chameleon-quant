@@ -226,17 +226,17 @@ def get_data_wapper(
         return [ohlcv_df, exchange, csv_path]
 
 
-def get_split_idx(df, ratio=0.2):
-    num = int(len(df) * ratio)
+def get_split_idx(length, ratio=0.2):
+    num = int(length * ratio)
     return {
         "df_start": 0,
-        "df_stop": len(df),
+        "df_stop": length,
         "train_start": 0,
-        "train_stop": len(df) - num * 2,
-        "valid_start": len(df) - num * 2,
-        "valid_stop": len(df) - num * 1,
-        "test_start": len(df) - num * 1,
-        "test_stop": len(df),
+        "train_stop": length - num * 2,
+        "valid_start": length - num * 2,
+        "valid_stop": length - num * 1,
+        "test_start": length - num * 1,
+        "test_stop": length,
     }
 
 

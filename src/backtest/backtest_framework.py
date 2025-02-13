@@ -42,7 +42,6 @@ def get_total_config():
 
 
 def get_total_fig(arr, plot_config, plot_params={}):
-
     fig = total_line(
         arr,
         plot_config=plot_config,
@@ -131,7 +130,8 @@ def get_optuna_result(params):
     f_df.reset_index(inplace=True)
     f_df.rename(columns={"index": "origin_index"}, inplace=True)
 
-    split_dict = get_split_idx(f_df, strategy_params.get("ratio", 0.2))
+    length = f_idx[1] - f_idx[0]
+    split_dict = get_split_idx(length, strategy_params.get("ratio", 0.2))
     train_start = split_dict["train_start"]
     train_stop = split_dict["train_stop"]
 
