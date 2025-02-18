@@ -26,7 +26,8 @@ def get_plot_config(df):
         {"name": "candle", "height_scale": 0.75, "show": True},
         {"name": "backtest", "height_scale": 0.25, "show": True},
     ]
-    if "rsi" in df.columns:
+    rsi_columns = [i for i in df.columns if "rsi" in i]
+    if len(rsi_columns) > 0:
         plot_config.insert(1, {"name": "rsi", "height_scale": 0.25, "show": True})
         plot_config[0]["height_scale"] = 0.60
         plot_config[1]["height_scale"] = 0.15

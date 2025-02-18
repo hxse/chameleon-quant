@@ -40,7 +40,7 @@ def run_long(
     low = low_list[idx]
     close = close_list[idx]
 
-    if status == 1 and status_list[idx - 1] != 2:
+    if status == 1 and status_list[idx - 1] != 2 and status_list[idx - 1] != 1:
         last_idx = idx
         pole_idx = idx
         n = 0

@@ -257,10 +257,10 @@ def run_backtest_warp(
     df.drop(["conflict"], axis=1, inplace=True)
 
     return {
+        "total": df.iloc[-1]["merge_total"],
         "count": count,
         "long_count": long_count,
         "short_count": short_count,
-        "total": df.iloc[-1]["merge_total"],
         "one_side": long_count == 0 or short_count == 0,
         "repeat_count": repeat_count,
         "conflict_count": conflict_count,

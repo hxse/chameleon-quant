@@ -363,18 +363,21 @@ def line_plot(
         height=int(height * height_scale),
         output_backend="webgl",
     )
-    if "rsi" in df.columns:
+
+    color = ["orange", "green", "blue", "purple", "grey"]
+    rsi_columns = [i for i in df.columns if "rsi" in i]
+    for k, v in enumerate(rsi_columns):
         fig.line(
             "index",
-            "rsi",
+            v,
             source=source_df,
             line_width=2,
             line_alpha=1,
-            line_color="green",
+            line_color=color[k] if k < len(color) else color[len(color) - 1],
             visible=True,
         )
 
-    return [fig, ["rsi"]]
+    return [fig, rsi_columns]
 
 
 def add_total(fig, df, plot_params, side_arr=[]):
