@@ -391,8 +391,8 @@ def line_plot(
     return [fig, item_columns]
 
 
-def add_total(fig, df, plot_params, side_arr=[]):
-
+def add_total(fig, source_df, plot_params, side_arr=[]):
+    res_col = []
     if (
         "merge_total" in side_arr
         and plot_params
@@ -405,12 +405,13 @@ def add_total(fig, df, plot_params, side_arr=[]):
         fig.line(
             "index",
             "merge_total",
-            source=df,
+            source=source_df,
             line_width=2,
             line_alpha=1,
             line_color="black",
             visible=True,
         )
+        res_col.append("merge_total")
 
     if (
         "long_total" in side_arr
@@ -421,12 +422,31 @@ def add_total(fig, df, plot_params, side_arr=[]):
         fig.line(
             "index",
             "long_total",
-            source=df,
+            source=source_df,
             line_width=2,
             line_alpha=1,
             line_color="green",
             visible=True,
         )
+        res_col.append("long_total")
+
+        if (
+            plot_params["short_count"] == 0
+            and "enable_hold" in plot_params
+            and plot_params["enable_hold"]
+        ):
+            fig.line(
+                "index",
+                "long_hold",
+                source=source_df,
+                line_width=2,
+                line_alpha=1,
+                line_color="orange",
+                # line_dash="dotted",
+                visible=True,
+            )
+            res_col.append("long_hold")
+
     if (
         "short_total" in side_arr
         and plot_params
@@ -436,12 +456,31 @@ def add_total(fig, df, plot_params, side_arr=[]):
         fig.line(
             "index",
             "short_total",
-            source=df,
+            source=source_df,
             line_width=2,
             line_alpha=1,
             line_color="red",
             visible=True,
         )
+        res_col.append("short_total")
+
+        if (
+            plot_params["long_count"] == 0
+            and "enable_hold" in plot_params
+            and plot_params["enable_hold"]
+        ):
+            fig.line(
+                "index",
+                "short_hold",
+                source=source_df,
+                line_width=2,
+                line_alpha=1,
+                line_color="orange",
+                # line_dash="dotted",
+                visible=True,
+            )
+            res_col.append("short_hold")
+    return res_col
 
 
 def backtest_plot(
@@ -468,7 +507,7 @@ def backtest_plot(
     )
 
     if not ("split_dict" in plot_params and len(plot_params["split_dict"].keys()) > 0):
-        add_total(
+        res_col = add_total(
             fig,
             source_df,
             plot_params,
@@ -485,7 +524,7 @@ def backtest_plot(
         # source = ColumnDataSource(data=df_dict)
 
         if plot_params.get("span_mode", True):
-            add_total(
+            res_col = add_total(
                 fig,
                 source_df,
                 plot_params,
@@ -512,7 +551,7 @@ def backtest_plot(
 
             source_valid = df_dict["source_valid"]
             source_test = df_dict["source_test"]
-            add_total(fig, source_df, plot_params, side_arr=["merge_total"])
+            res_col = add_total(fig, source_df, plot_params, side_arr=["merge_total"])
 
             # source = ColumnDataSource(data=df_dict[valid_start:valid_stop])
 
@@ -536,8 +575,7 @@ def backtest_plot(
                 line_color="yellow",
                 visible=True,
             )
-
-    return [fig, ["merge_total", "long_total", "short_total"]]
+    return [fig, res_col]
 
 
 def total_line(
