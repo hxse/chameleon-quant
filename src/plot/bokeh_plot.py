@@ -277,7 +277,9 @@ def add_hover(fig, df_dict):
     fig.add_tools(hover)
 
 
-def candlestick_plot(df_dict, width=800, height=400, width_scale=1, height_scale=0.75):
+def candlestick_plot(
+    plot_config_item, df_dict, width=800, height=400, width_scale=1, height_scale=0.75
+):
     """
     DataFrame 参考格式:
         date	open	high	low	close	volume
@@ -347,13 +349,19 @@ def candlestick_plot(df_dict, width=800, height=400, width_scale=1, height_scale
 
 
 def line_plot(
-    df_dict, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
+    plot_config_item,
+    df_dict,
+    width=800,
+    height=400,
+    width_scale=1,
+    height_scale=0.25,
+    plot_params=None,
 ):
     df = df_dict["df"]
     source_df = df_dict["source_df"]
 
     fig = figure(
-        name="rsi_plot",
+        name=f"{plot_config_item['name']}_plot",
         sizing_mode="scale_width",
         tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
@@ -365,8 +373,11 @@ def line_plot(
     )
 
     color = ["orange", "green", "blue", "purple", "grey"]
-    rsi_columns = [i for i in df.columns if "rsi" in i]
-    for k, v in enumerate(rsi_columns):
+    item_columns = [i for i in df.columns if plot_config_item["name"] in i]
+    for k, v in enumerate(item_columns):
+        if v == "macdh":
+            fig.vbar(x="index", top="macdh", width=0.6, source=source_df)
+            continue
         fig.line(
             "index",
             v,
@@ -377,7 +388,7 @@ def line_plot(
             visible=True,
         )
 
-    return [fig, rsi_columns]
+    return [fig, item_columns]
 
 
 def add_total(fig, df, plot_params, side_arr=[]):
@@ -434,7 +445,13 @@ def add_total(fig, df, plot_params, side_arr=[]):
 
 
 def backtest_plot(
-    df_dict, width=800, height=400, width_scale=1, height_scale=0.25, plot_params=None
+    plot_config_item,
+    df_dict,
+    width=800,
+    height=400,
+    width_scale=1,
+    height_scale=0.25,
+    plot_params=None,
 ):
     source_df = df_dict["source_df"]
 
@@ -610,6 +627,7 @@ def layout_plot(
             continue
         if i["name"] == "candle":
             _f = candlestick_plot(
+                i,
                 df_dict,
                 width=width,
                 height=height,
@@ -619,6 +637,7 @@ def layout_plot(
             columns_array.append(_f[1])
         elif i["name"] == "backtest":
             _f = backtest_plot(
+                i,
                 df_dict,
                 width=width,
                 height=height,
@@ -629,6 +648,7 @@ def layout_plot(
             columns_array.append(_f[1])
         else:
             _f = line_plot(
+                i,
                 df_dict,
                 width=width,
                 height=height,

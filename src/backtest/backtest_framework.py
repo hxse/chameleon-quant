@@ -22,16 +22,30 @@ from tqdm import tqdm
 
 
 def get_plot_config(df):
-    plot_config = [
-        {"name": "candle", "height_scale": 0.75, "show": True},
-        {"name": "backtest", "height_scale": 0.25, "show": True},
+    height_scale_arr = [
+        [0.75, 0.25],
+        [0.6, 0.2, 0.2],
+        [0.5, 0.15, 0.15, 0.2],
+        [0.5, 0.1, 0.1, 0.1, 0.2],
+        [0.4, 0.1, 0.1, 0.1, 0.1, 0.2],
     ]
+    plot_config = [
+        {"name": "candle", "show": True},
+        {"name": "backtest", "show": True},
+    ]
+
     rsi_columns = [i for i in df.columns if "rsi" in i]
     if len(rsi_columns) > 0:
-        plot_config.insert(1, {"name": "rsi", "height_scale": 0.25, "show": True})
-        plot_config[0]["height_scale"] = 0.60
-        plot_config[1]["height_scale"] = 0.15
-        plot_config[2]["height_scale"] = 0.25
+        plot_config.insert(1, {"name": "rsi", "show": True})
+
+    macd_columns = [i for i in df.columns if "macd" in i]
+    if len(macd_columns) > 0:
+        plot_config.insert(1, {"name": "macd", "show": True})
+
+    scale_arr = height_scale_arr[len(plot_config) - 2]
+    assert len(scale_arr) == len(plot_config), "need equal length"
+    for k, v in enumerate(scale_arr):
+        plot_config[k]["height_scale"] = v
     return plot_config
 
 
