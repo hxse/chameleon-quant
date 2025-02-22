@@ -413,6 +413,31 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
         )
         res_col.append("merge_total")
 
+        if "enable_hold" in plot_params and plot_params["enable_hold"]:
+            fig.line(
+                "index",
+                "long_hold",
+                source=source_df,
+                line_width=2,
+                line_alpha=1,
+                line_color="orange",
+                # line_dash="dotted",
+                visible=True,
+            )
+            res_col.append("long_hold")
+
+            fig.line(
+                "index",
+                "short_hold",
+                source=source_df,
+                line_width=2,
+                line_alpha=1,
+                line_color="purple",
+                # line_dash="dotted",
+                visible=True,
+            )
+            res_col.append("short_hold")
+
     if (
         "long_total" in side_arr
         and plot_params
@@ -475,7 +500,7 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
                 source=source_df,
                 line_width=2,
                 line_alpha=1,
-                line_color="orange",
+                line_color="purple",
                 # line_dash="dotted",
                 visible=True,
             )
