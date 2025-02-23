@@ -16,7 +16,9 @@ from bokeh.models.ranges import DataRange1d
 
 
 def get_df_dict(df, plot_params={}):
-    _df = df[["time", "date", "open", "high", "low", "close"]]
+    df["left"] = df.index.astype(np.float64) - 0.4
+    df["right"] = df.index.astype(np.float64) + 0.4
+    _df = df[["time", "date", "open", "high", "low", "close", "left", "right"]]
     _c = ~_df.columns.isin(["time", "date"])
     df_inc = _df.copy()
     df_inc.loc[df_inc.close <= df_inc.open, _c] = np.nan
@@ -39,7 +41,12 @@ def get_df_dict(df, plot_params={}):
         source_test = ColumnDataSource(data=df[test_start:test_stop])
         _["source_valid"] = source_valid
         _["source_test"] = source_test
+
     source_plot = get_source_plot(df)
+
+    df.drop(["left"], axis=1, inplace=True)
+    df.drop(["right"], axis=1, inplace=True)
+
     return {
         "df": df,
         "source_df": source_df,
@@ -95,6 +102,16 @@ def get_source_plot(df):
         if i.startswith("chan_price") and not i.startswith("_"):
             df[f"_{i}"] = df[i]
             df[f"_{i}"] = df[f"_{i}"].interpolate(method="linear")
+
+    macd_columns = [
+        i for i in df.columns if i.startswith("macd") and not i.startswith("_")
+    ]
+    if len(macd_columns) > 0:
+        df[f"macd0"] = 0
+        df["macdh_inc"] = df["macdh"]
+        df["macdh_dec"] = df["macdh"]
+        df.loc[df["macdh"] <= 0, "macdh_inc"] = np.nan
+        df.loc[df["macdh"] > 0, "macdh_dec"] = np.nan
 
     source = ColumnDataSource(data=df)
     return source
@@ -334,24 +351,24 @@ def candlestick_plot(
         color="red",
         source=source_dec,
     )
-    width_vbar = 0.65
-    bar_inc = fig.vbar(
-        "index",
-        width_vbar,
-        "open",
-        "close",
-        color="green",
+    bar_inc = fig.quad(
+        top="close",
+        bottom="open",
+        left="left",
+        right="right",
         source=source_inc,
+        fill_color="green",
+        line_color=None,
     )
-    bar_dec = fig.vbar(
-        "index",
-        width_vbar,
-        "open",
-        "close",
-        color="red",
+    bar_dec = fig.quad(
+        top="close",
+        bottom="open",
+        left="left",
+        right="right",
         source=source_dec,
+        fill_color="red",
+        line_color=None,
     )
-
     color_arr = ["brown", "goldenrod", "cornflowerblue", "cyan", "blue", "gray"]
     n = 0
     for c in source_plot.data.keys():
@@ -388,6 +405,7 @@ def line_plot(
 ):
     df = df_dict["df"]
     source_df = df_dict["source_df"]
+    source_plot = df_dict["source_plot"]
 
     fig = figure(
         name=f'{plot_config_item["name"]}_plot',
@@ -405,7 +423,24 @@ def line_plot(
     item_columns = filter_columns(plot_config_item["key"], df.columns)
     for k, v in enumerate(item_columns):
         if v == "macdh":
-            fig.vbar(x="index", top="macdh", width=0.6, source=source_df)
+            fig.quad(
+                top="macdh_inc",
+                bottom="macd0",
+                left="left",
+                right="right",
+                source=source_plot,
+                fill_color="green",
+                line_color=None,
+            )
+            fig.quad(
+                top="macdh_dec",
+                bottom="macd0",
+                left="left",
+                right="right",
+                source=source_plot,
+                fill_color="red",
+                line_color=None,
+            )
             continue
         fig.line(
             "index",
