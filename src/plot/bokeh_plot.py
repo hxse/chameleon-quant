@@ -90,6 +90,12 @@ def get_source_plot(df):
 
     # for i in _arr:
     #     df.drop(i[0], axis=1, inplace=True)
+
+    for i in df.columns:
+        if i.startswith("chan_price") and not i.startswith("_"):
+            df[f"_{i}"] = df[i]
+            df[f"_{i}"] = df[f"_{i}"].interpolate(method="linear")
+
     source = ColumnDataSource(data=df)
     return source
 
@@ -291,6 +297,7 @@ def candlestick_plot(
     source_df = df_dict["source_df"]
     source_inc = df_dict["source_inc"]
     source_dec = df_dict["source_dec"]
+    source_plot = df_dict["source_plot"]
 
     fig = figure(
         name="candle_plot",
@@ -344,6 +351,24 @@ def candlestick_plot(
         color="red",
         source=source_dec,
     )
+
+    color_arr = ["brown", "goldenrod", "cyan", "blue", "gray"]
+    n = 0
+    for c in source_plot.data.keys():
+        if c.startswith("_chan_price"):
+            fig.line(
+                "index",
+                c,
+                source=source_plot,
+                line_width=2,
+                line_alpha=1,
+                line_color=color_arr[n] if n < len(color_arr) else color_arr[-1],
+                visible=True,
+            )
+            n += 1
+        # fig.circle(
+        #     "index", c, source=source_plot, size=5, color="blue", alpha=0.4
+        # )
 
     return [fig, ["high", "low"]]
 

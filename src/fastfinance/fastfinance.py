@@ -65,7 +65,7 @@ def convolve(data, kernel):
     out = np.array([np.nan] * size_out)
     kernel = np.flip(kernel)
     for i in range(size_out):
-        window = data[i:i + size_kernel]
+        window = data[i : i + size_kernel]
         out[i] = sum([window[j] * kernel[j] for j in range(size_kernel)])
     return out
 
@@ -81,7 +81,7 @@ def sma(data, period):
     size = len(data)
     out = np.full(size, np.nan)
     for i in range(period - 1, size):
-        window = data[i - period + 1:i + 1]
+        window = data[i - period + 1 : i + 1]
         out[i] = np.mean(window)
     return out
 
@@ -132,7 +132,7 @@ def ema(data, period, smoothing=2.0):
     out[0] = data[0]
     for i in range(1, size):
         out[i] = (data[i] * weight) + (out[i - 1] * (1 - weight))
-    out[:period - 1] = np.nan
+    out[: period - 1] = np.nan
     return out
 
 
@@ -160,7 +160,9 @@ def dema(data, period, smoothing=2.0):
     :type smoothing: float
     :rtype: np.ndarray
     """
-    return (2 * ema(data, period, smoothing)) - ema(ema(data, period, smoothing), period, smoothing)
+    return (2 * ema(data, period, smoothing)) - ema(
+        ema(data, period, smoothing), period, smoothing
+    )
 
 
 @jit(nopython=True)
@@ -172,8 +174,10 @@ def trix(data, period, smoothing=2.0):
     :type smoothing: float
     :rtype: np.ndarray
     """
-    return ((3 * ema(data, period, smoothing) - (3 * ema(ema(data, period, smoothing), period, smoothing))) +
-            ema(ema(ema(data, period, smoothing), period, smoothing), period, smoothing))
+    return (
+        3 * ema(data, period, smoothing)
+        - (3 * ema(ema(data, period, smoothing), period, smoothing))
+    ) + ema(ema(ema(data, period, smoothing), period, smoothing), period, smoothing)
 
 
 @jit(nopython=True)
@@ -211,7 +215,9 @@ def stoch(c_close, c_high, c_low, period_k, period_d):
 
 
 @jit(nopython=True)
-def kdj(c_close, c_high, c_low, period_rsv=9, period_k=3, period_d=3, weight_k=3, weight_d=2):
+def kdj(
+    c_close, c_high, c_low, period_rsv=9, period_k=3, period_d=3, weight_k=3, weight_d=2
+):
     """
     KDJ
     :type c_close: np.ndarray
@@ -274,7 +280,9 @@ def rsi(data, period, smoothing=2.0, f_sma=True, f_clip=True, f_abs=True):
     down = np.array([np.nan] * size)
     delta = np.diff(data)
     if f_clip:
-        up, down = np.clip(delta, a_min=0, a_max=np.max(delta)), np.clip(delta, a_min=np.min(delta), a_max=0)
+        up, down = np.clip(delta, a_min=0, a_max=np.max(delta)), np.clip(
+            delta, a_min=np.min(delta), a_max=0
+        )
     else:
         up, down = delta.copy(), delta.copy()
         up[delta < 0] = 0.0
@@ -284,10 +292,13 @@ def rsi(data, period, smoothing=2.0, f_sma=True, f_clip=True, f_abs=True):
             down[i] = fabs(x)
     else:
         down = np.abs(down)
-    rs = sma(up, period) / sma(down, period) if f_sma else ema(up, period - 1, smoothing) / ema(
-        down, period - 1, smoothing)
+    rs = (
+        sma(up, period) / sma(down, period)
+        if f_sma
+        else ema(up, period - 1, smoothing) / ema(down, period - 1, smoothing)
+    )
     out = np.full(size, np.nan)
-    out[1:] = (100 - 100 / (1 + rs))
+    out[1:] = 100 - 100 / (1 + rs)
     return out
 
 
@@ -306,7 +317,7 @@ def srsi(data, period, smoothing=2.0, f_sma=True, f_clip=True, f_abs=True):
     r = rsi(data, period, smoothing, f_sma, f_clip, f_abs)[period:]
     s = np.array([np.nan] * len(r))
     for i in range(period - 1, len(r)):
-        window = r[i + 1 - period:i + 1]
+        window = r[i + 1 - period : i + 1]
         mw = np.min(window)
         s[i] = ((r[i] - mw) / (np.max(window) - mw)) * 100
     return np.concatenate((np.array([np.nan] * (len(data) - len(s))), s))
@@ -328,10 +339,12 @@ def cmo(c_close, period, f_sma=True, f_clip=True, f_abs=True):
     sums_up = np.array([np.nan] * size)
     sums_down = np.array([np.nan] * size)
     for i in range(period - 1, size):
-        window = c_close[i + 1 - period:i + 1]
+        window = c_close[i + 1 - period : i + 1]
         d = np.diff(window)
         if f_clip:
-            up, down = np.clip(d, a_min=0, a_max=np.max(d)), np.clip(d, a_min=np.min(d), a_max=0)
+            up, down = np.clip(d, a_min=0, a_max=np.max(d)), np.clip(
+                d, a_min=np.min(d), a_max=0
+            )
         else:
             up, down = d.copy(), d.copy()
             up[d < 0] = 0.0
@@ -363,7 +376,7 @@ def bollinger_bands(data, period, dev_up=2.0, dev_down=2.0):
     bb_width = np.array([np.nan] * size)
     bb_mid = sma(data, period)
     for i in range(period - 1, size):
-        std_dev = np.std(data[i - period + 1:i + 1])
+        std_dev = np.std(data[i - period + 1 : i + 1])
         mid = bb_mid[i]
         bb_up[i] = mid + (std_dev * dev_up)
         bb_down[i] = mid - (std_dev * dev_down)
@@ -428,9 +441,12 @@ def heiken_ashi(c_open, c_high, c_low, c_close):
     ha_open[0] = (c_open[0] + c_close[0]) / 2
     for i in range(1, len(c_close)):
         ha_open[i] = (c_open[i - 1] + c_close[i - 1]) / 2
-    return \
-        ha_open, np.maximum(np.maximum(ha_open, ha_close), c_high), np.minimum(np.minimum(ha_open, ha_close), c_low), \
-        ha_close
+    return (
+        ha_open,
+        np.maximum(np.maximum(ha_open, ha_close), c_high),
+        np.minimum(np.minimum(ha_open, ha_close), c_low),
+        ha_close,
+    )
 
 
 @jit(nopython=True)
@@ -450,17 +466,21 @@ def ichimoku(data, tenkansen=9, kinjunsen=26, senkou_b=52, shift=26):
     n_kinjunsen = np.array([np.nan] * size)
     n_senkou_b = np.array([np.nan] * (size + shift))
     for i in range(tenkansen - 1, size):
-        window = data[i + 1 - tenkansen:i + 1]
+        window = data[i + 1 - tenkansen : i + 1]
         n_tenkansen[i] = (np.max(window) + np.min(window)) / 2
     for i in range(kinjunsen - 1, size):
-        window = data[i + 1 - kinjunsen:i + 1]
+        window = data[i + 1 - kinjunsen : i + 1]
         n_kinjunsen[i] = (np.max(window) + np.min(window)) / 2
     for i in range(senkou_b - 1, size):
-        window = data[i + 1 - senkou_b:i + 1]
+        window = data[i + 1 - senkou_b : i + 1]
         n_senkou_b[i + shift] = (np.max(window) + np.min(window)) / 2
-    return \
-        n_tenkansen, n_kinjunsen, np.concatenate(((data[shift:]), (np.array([np.nan] * (size - shift))))), \
-        np.concatenate((np.array([np.nan] * shift), ((n_tenkansen + n_kinjunsen) / 2))), n_senkou_b
+    return (
+        n_tenkansen,
+        n_kinjunsen,
+        np.concatenate(((data[shift:]), (np.array([np.nan] * (size - shift))))),
+        np.concatenate((np.array([np.nan] * shift), ((n_tenkansen + n_kinjunsen) / 2))),
+        n_senkou_b,
+    )
 
 
 @jit(nopython=True)
@@ -492,7 +512,9 @@ def tr(c_open, c_high, c_low):
     :type c_low: np.ndarray
     :rtype: np.ndarray
     """
-    return np.maximum(np.maximum(c_open - c_low, np.abs(c_high - c_open)), np.abs(c_low - c_open))
+    return np.maximum(
+        np.maximum(c_open - c_low, np.abs(c_high - c_open)), np.abs(c_low - c_open)
+    )
 
 
 @jit(nopython=True)
@@ -533,7 +555,11 @@ def adx(c_open, c_high, c_low, period_adx, period_dm, smoothing=2.0):
     avg_tr = atr(c_open, c_high, c_low, period_dm)
     dm_up_avg = 100 * ema(dm_up, period_dm, smoothing) / avg_tr
     dm_down_avg = 100 * ema(dm_down, period_dm, smoothing) / avg_tr
-    return ema(100 * np.abs(dm_up_avg - dm_down_avg) / (dm_up_avg + dm_down_avg), period_adx, smoothing)
+    return ema(
+        100 * np.abs(dm_up_avg - dm_down_avg) / (dm_up_avg + dm_down_avg),
+        period_adx,
+        smoothing,
+    )
 
 
 @jit(nopython=True)
@@ -601,7 +627,7 @@ def aroon(data, period):
     out_up = np.array([np.nan] * size)
     out_down = np.array([np.nan] * size)
     for i in range(period - 1, size):
-        window = np.flip(data[i + 1 - period:i + 1])
+        window = np.flip(data[i + 1 - period : i + 1])
         out_up[i] = ((period - window.argmax()) / period) * 100
         out_down[i] = ((period - window.argmin()) / period) * 100
     return out_up, out_down
@@ -627,7 +653,9 @@ def cmf(c_close, c_high, c_low, c_volume, period):
         w_high = c_high[s:e]
         w_low = c_low[s:e]
         w_vol = c_volume[s:e]
-        out[i] = sum((((w_close - w_low) - (w_high - w_close)) / (w_high - w_low)) * w_vol) / sum(w_vol)
+        out[i] = sum(
+            (((w_close - w_low) - (w_high - w_close)) / (w_high - w_low)) * w_vol
+        ) / sum(w_vol)
     return out
 
 
@@ -643,7 +671,7 @@ def vix(c_close, c_low, period):
     size = len(c_close)
     out = np.full(size, np.nan)
     for i in range(period - 1, size):
-        hc = np.max(c_close[i + 1 - period:i + 1])
+        hc = np.max(c_close[i + 1 - period : i + 1])
         out[i] = ((hc - c_low[i]) / hc) * 100
     return out
 
@@ -659,17 +687,21 @@ def fdi(c_close, period):
     size = len(c_close)
     out = np.full(size, np.nan)
     for i in range(period - 1, size):
-        window = c_close[i + 1 - period:i + 1]
+        window = c_close[i + 1 - period : i + 1]
         pdiff = 0
         length = 0
         hc = np.max(window)
         lc = np.min(window)
-        for j in (range(1, period - 1)):
+        for j in range(1, period - 1):
             if hc > lc:
                 diff = (window[-j] - lc) / (hc - lc)
-                length += np.sqrt(((diff - pdiff) + (1 / (period ** 2))) ** 2) if j > 1 else 0
+                length += (
+                    np.sqrt(((diff - pdiff) + (1 / (period**2))) ** 2) if j > 1 else 0
+                )
                 pdiff = diff
-        out[i] = (1 + (np.log(length) + np.log(2)) / np.log(2 * period)) if length > 0 else 0
+        out[i] = (
+            (1 + (np.log(length) + np.log(2)) / np.log(2 * period)) if length > 0 else 0
+        )
     return out
 
 
@@ -766,9 +798,13 @@ def fourier_fit_extra(data, harmonic, extra=0):
     freq *= 1.0 / size
     lx = np.arange(0, size + extra)
     out = np.zeros(lx.shape)
-    index = [v for _, v in sorted([(np.absolute(four[v]), v) for v in list(range(size))])][::-1]
-    for i in index[:1 + harmonic * 2]:
-        out += (abs(four[i]) / size) * np.cos(2 * np.pi * freq[i] * lx + np.angle(four[i]))
+    index = [
+        v for _, v in sorted([(np.absolute(four[v]), v) for v in list(range(size))])
+    ][::-1]
+    for i in index[: 1 + harmonic * 2]:
+        out += (abs(four[i]) / size) * np.cos(
+            2 * np.pi * freq[i] * lx + np.angle(four[i])
+        )
     return out + lsf[0] * lx
 
 
@@ -823,7 +859,10 @@ def chop(c_close, c_open, c_high, c_low, period=14):
     for i in range(period - 1, size):
         e = i + 1
         s = e - period
-        out[i] = (100 * np.log10(np.sum(a_tr[s:e]) / (np.max(c_high[s:e]) - np.min(c_low[s:e])))) / np.log10(period)
+        out[i] = (
+            100
+            * np.log10(np.sum(a_tr[s:e]) / (np.max(c_high[s:e]) - np.min(c_low[s:e])))
+        ) / np.log10(period)
     return out
 
 
@@ -845,7 +884,7 @@ def cog(data, period=10):
         num = 0
         for j in range(0, period):
             num += window[j] * (period - j)
-        out[i] = - num / den
+        out[i] = -num / den
     return out
 
 
@@ -865,7 +904,9 @@ def lsma(data, period=14, regression=True):
         for i in range(period - 1, size):
             e = i + 1
             s = e - period
-            intercept, slope = np.dot(np.linalg.pinv(np.vstack((np.ones(period), w)).T), data[s:e])
+            intercept, slope = np.dot(
+                np.linalg.pinv(np.vstack((np.ones(period), w)).T), data[s:e]
+            )
             out[i] = slope * period + intercept
     else:
         for i in range(period - 1, size):
@@ -944,9 +985,188 @@ def grma(data, period):
     alpha = (sr - 1) / (sr + 1)
     for i in range(period - 1, size):
         if i == period - 1:
-            out[i] = np.mean(data[:i + 1])
+            out[i] = np.mean(data[: i + 1])
         else:
             t1 = alpha * (data[i] - out[i - 1])
             t2 = (1 - alpha) * (data[i - 1] - out[i - 1])
             out[i] = out[i - 1] + t1 + t2
     return out
+
+
+@jit(nopython=True)
+def chan2_get_last_high(_high, _last_high, i, last_high_idx):
+    last_high = _high if _high > _last_high else _last_high
+    last_high_idx = i if _high > _last_high else last_high_idx
+    return last_high, last_high_idx
+
+
+@jit(nopython=True)
+def chan2_get_last_low(_low, _last_low, i, last_low_idx):
+    last_low = _low if _low < _last_low else _last_low
+    last_low_idx = i if _low < _last_low else last_low_idx
+    return last_low, last_low_idx
+
+
+@jit(nopython=True)
+def chan2_set_state_long(
+    last_high,
+    last_high_idx,
+    last_low,
+    last_low_idx,
+    res_chan_state,
+    res_chan_price,
+):
+    if last_low_idx != -1:
+        res_chan_state[last_low_idx] = -1
+        res_chan_price[last_low_idx] = last_low
+    return last_high, last_high_idx
+
+
+@jit(nopython=True)
+def chan2_set_state_short(
+    last_high,
+    last_high_idx,
+    last_low,
+    last_low_idx,
+    res_chan_state,
+    res_chan_price,
+):
+    if last_high_idx != -1:
+        res_chan_state[last_high_idx] = 1
+        res_chan_price[last_high_idx] = last_high
+    return last_low, last_low_idx
+
+
+@jit(nopython=True)
+def chan(c_open, c_high, c_low, c_close):
+    """
+    Chan
+    :type c_open: np.ndarray
+    :type c_high: np.ndarray
+    :type c_low: np.ndarray
+    :type c_close: np.ndarray
+    :rtype: (np.ndarray, np.ndarray)
+    :return: chan_state, chan_price
+    """
+    chan_state = np.full_like(c_close, np.nan)
+    chan_price = np.full_like(c_close, np.nan)
+    last_state = np.nan
+    last_high = np.nan
+    last_high_idx = -1
+    last_low = np.nan
+    last_low_idx = -1
+    length = len(c_close)
+    for i in range(1, length):
+        if last_state == 1:
+            last_high, last_high_idx = chan2_get_last_high(
+                c_high[i], c_high[last_high_idx], i, last_high_idx
+            )
+
+        if c_high[i] > c_high[i - 1] and c_low[i] > c_low[i - 1]:
+            if last_state == -1 or np.isnan(last_state):
+                last_high, last_high_idx = chan2_set_state_long(
+                    c_high[i],
+                    i,
+                    last_low,
+                    last_low_idx,
+                    chan_state,
+                    chan_price,
+                )
+            last_state = 1
+
+        if last_state == -1:
+            last_low, last_low_idx = chan2_get_last_low(
+                c_low[i], c_low[last_low_idx], i, last_low_idx
+            )
+
+        if c_high[i] < c_high[i - 1] and c_low[i] < c_low[i - 1]:
+            if last_state == 1 or np.isnan(last_state):
+                last_low, last_low_idx = chan2_set_state_short(
+                    last_high,
+                    last_high_idx,
+                    c_low[i],
+                    i,
+                    chan_state,
+                    chan_price,
+                )
+            last_state = -1
+
+    return (chan_state, chan_price)
+
+
+@jit(nopython=True)
+def chan2(chan_state, chan_price):
+    res_chan_state = np.full_like(chan_price, np.nan)
+    res_chan_price = np.full_like(chan_price, np.nan)
+    last_state = np.nan
+    last_high = np.nan
+    last_high_idx = -1
+    last_low = np.nan
+    last_low_idx = -1
+    last_state_arr = np.array([0, 0, 0, 0])
+    last_price_arr = np.array([0, 0, 0, 0])
+    length = len(chan_price)
+    n = 0
+    for i in range(length):
+        if np.isnan(chan_state[i]):
+            continue
+        if n < 4:
+            last_state_arr[n] = chan_state[i]
+            last_price_arr[n] = chan_price[i]
+        else:
+            last_state_arr = np.roll(last_state_arr, -1)
+            last_state_arr[-1] = chan_state[i]
+
+            last_price_arr = np.roll(last_price_arr, -1)
+            last_price_arr[-1] = chan_price[i]
+
+        if last_state == 1:
+            last_high, last_high_idx = chan2_get_last_high(
+                chan_price[i], chan_price[last_high_idx], i, last_high_idx
+            )
+
+        if (
+            last_state_arr[0] == -1
+            and last_state_arr[1] == 1
+            and last_state_arr[2] == -1
+            and last_state_arr[3] == 1
+            and last_price_arr[2] > last_price_arr[0]
+            and last_price_arr[3] > last_price_arr[1]
+        ):
+            if last_state == -1 or np.isnan(last_state):
+                last_high, last_high_idx = chan2_set_state_long(
+                    chan_price[i],
+                    i,
+                    last_low,
+                    last_low_idx,
+                    res_chan_state,
+                    res_chan_price,
+                )
+            last_state = 1
+
+        if last_state == -1:
+            last_low, last_low_idx = chan2_get_last_low(
+                chan_price[i], chan_price[last_low_idx], i, last_low_idx
+            )
+
+        if (
+            last_state_arr[0] == 1
+            and last_state_arr[1] == -1
+            and last_state_arr[2] == 1
+            and last_state_arr[3] == -1
+            and last_price_arr[2] < last_price_arr[0]
+            and last_price_arr[3] < last_price_arr[1]
+        ):
+            if last_state == 1 or np.isnan(last_state):
+                last_low, last_low_idx = chan2_set_state_short(
+                    last_high,
+                    last_high_idx,
+                    chan_price[i],
+                    i,
+                    res_chan_state,
+                    res_chan_price,
+                )
+            last_state = -1
+
+        n += 1
+    return (res_chan_state, res_chan_price)
