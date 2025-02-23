@@ -10,7 +10,7 @@ from data_api.data_api import (
 
 from backtest.backtest import run_backtest_warp
 
-from plot.bokeh_plot import layout_plot, total_line, get_df_dict
+from plot.bokeh_plot import layout_plot, total_line, get_df_dict, filter_columns
 
 import optuna
 from optimize.run_optuna import optuna_wrapper
@@ -34,13 +34,20 @@ def get_plot_config(df):
         {"name": "backtest", "show": True},
     ]
 
-    rsi_columns = [i for i in df.columns if "rsi" in i]
+    _p = {"name": "rsi", "key": ["rsi"], "show": True}
+    rsi_columns = filter_columns(_p["key"], df.columns)
     if len(rsi_columns) > 0:
-        plot_config.insert(1, {"name": "rsi", "show": True})
+        plot_config.insert(1, _p)
 
-    macd_columns = [i for i in df.columns if "macd" in i]
+    _p = {"name": "macd", "key": ["macd"], "show": True}
+    macd_columns = filter_columns(_p["key"], df.columns)
     if len(macd_columns) > 0:
-        plot_config.insert(1, {"name": "macd", "show": True})
+        plot_config.insert(1, _p)
+
+    _p = {"name": "adx", "key": ["adx", "dmp", "dmn"], "show": True}
+    adx_columns = filter_columns(_p["key"], df.columns)
+    if len(adx_columns) > 0:
+        plot_config.insert(1, _p)
 
     scale_arr = height_scale_arr[len(plot_config) - 2]
     assert len(scale_arr) == len(plot_config), "need equal length"

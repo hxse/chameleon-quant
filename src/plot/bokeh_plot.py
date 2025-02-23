@@ -348,6 +348,10 @@ def candlestick_plot(
     return [fig, ["high", "low"]]
 
 
+def filter_columns(key_arr, columns):
+    return list(dict.fromkeys([i for i in columns for k in key_arr if i.startswith(k)]))
+
+
 def line_plot(
     plot_config_item,
     df_dict,
@@ -361,7 +365,7 @@ def line_plot(
     source_df = df_dict["source_df"]
 
     fig = figure(
-        name=f"{plot_config_item['name']}_plot",
+        name=f'{plot_config_item["name"]}_plot',
         sizing_mode="scale_width",
         tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
@@ -373,7 +377,7 @@ def line_plot(
     )
 
     color = ["orange", "green", "blue", "purple", "grey"]
-    item_columns = [i for i in df.columns if plot_config_item["name"] in i]
+    item_columns = filter_columns(plot_config_item["key"], df.columns)
     for k, v in enumerate(item_columns):
         if v == "macdh":
             fig.vbar(x="index", top="macdh", width=0.6, source=source_df)
