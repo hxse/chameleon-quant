@@ -352,7 +352,7 @@ def candlestick_plot(
         source=source_dec,
     )
 
-    color_arr = ["brown", "goldenrod", "cyan", "blue", "gray"]
+    color_arr = ["brown", "goldenrod", "cornflowerblue", "cyan", "blue", "gray"]
     n = 0
     for c in source_plot.data.keys():
         if c.startswith("_chan_price"):
