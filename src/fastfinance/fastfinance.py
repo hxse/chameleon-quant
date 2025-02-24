@@ -1050,6 +1050,8 @@ def chan(c_open, c_high, c_low, c_close):
     """
     chan_state = np.full_like(c_close, np.nan)
     chan_price = np.full_like(c_close, np.nan)
+    chan_lock = np.full_like(c_close, np.nan)
+    chan_divide = np.full_like(c_close, np.nan)
     last_state = np.nan
     last_high = np.nan
     last_high_idx = -1
@@ -1072,6 +1074,8 @@ def chan(c_open, c_high, c_low, c_close):
                     chan_state,
                     chan_price,
                 )
+                chan_lock[i] = 1
+                chan_divide[i] = c_high[i]
             last_state = 1
 
         if last_state == -1:
@@ -1089,84 +1093,155 @@ def chan(c_open, c_high, c_low, c_close):
                     chan_state,
                     chan_price,
                 )
+                chan_lock[i] = 1
+                chan_divide[i] = c_low[i]
             last_state = -1
 
-    return (chan_state, chan_price)
+    return (chan_state, chan_price, chan_lock, chan_divide)
 
 
 @jit(nopython=True)
-def chan2(chan_state, chan_price):
+def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
     res_chan_state = np.full_like(chan_price, np.nan)
     res_chan_price = np.full_like(chan_price, np.nan)
+    res_chan_lock = np.full_like(chan_price, np.nan)
+    res_chan_divide = np.full_like(chan_price, np.nan)
     last_state = np.nan
+    lock_state_1 = False
+    lock_state_2 = False
     last_high = np.nan
     last_high_idx = -1
     last_low = np.nan
     last_low_idx = -1
-    last_state_arr = np.array([0, 0, 0, 0])
-    last_price_arr = np.array([0, 0, 0, 0])
+    _l = 4
+    last_state_arr = np.zeros(_l)
+    last_price_arr = np.zeros(_l)
     length = len(chan_price)
     n = 0
     for i in range(length):
-        if np.isnan(chan_state[i]):
-            continue
-        if n < 4:
-            last_state_arr[n] = chan_state[i]
-            last_price_arr[n] = chan_price[i]
-        else:
-            last_state_arr = np.roll(last_state_arr, -1)
-            last_state_arr[-1] = chan_state[i]
+        if not np.isnan(chan_state[i]):
+            if n < _l:
+                last_state_arr[n] = chan_state[i]
+                last_price_arr[n] = chan_price[i]
+            else:
+                last_state_arr = np.roll(last_state_arr, -1)
+                last_state_arr[-1] = chan_state[i]
 
-            last_price_arr = np.roll(last_price_arr, -1)
-            last_price_arr[-1] = chan_price[i]
+                last_price_arr = np.roll(last_price_arr, -1)
+                last_price_arr[-1] = chan_price[i]
 
         if last_state == 1:
             last_high, last_high_idx = chan2_get_last_high(
-                chan_price[i], chan_price[last_high_idx], i, last_high_idx
+                c_high[i], c_high[last_high_idx], i, last_high_idx
             )
 
         if (
-            last_state_arr[0] == -1
-            and last_state_arr[1] == 1
-            and last_state_arr[2] == -1
-            and last_state_arr[3] == 1
-            and last_price_arr[2] > last_price_arr[0]
+            last_state_arr[1] == -1
+            and last_state_arr[2] == 1
+            and last_state_arr[3] == -1
             and last_price_arr[3] > last_price_arr[1]
+            and c_high[i] > last_price_arr[2]
         ):
+            if last_state == -1 and not lock_state_1:
+                res_chan_lock[i] = 1
+                res_chan_divide[i] = c_high[i]
+                lock_state_1 = True
+                lock_state_2 = False
+
             if last_state == -1 or np.isnan(last_state):
                 last_high, last_high_idx = chan2_set_state_long(
-                    chan_price[i],
+                    c_high[i],
                     i,
                     last_low,
                     last_low_idx,
                     res_chan_state,
                     res_chan_price,
                 )
-            last_state = 1
+                last_state = 1
+        elif (
+            not np.isnan(chan_state[i])
+            and last_state_arr[0] == -1
+            and last_state_arr[1] == 1
+            and last_state_arr[2] == -1
+            and last_state_arr[3] == 1
+            and last_price_arr[2] > last_price_arr[0]
+            and last_price_arr[3] > last_price_arr[1]
+            and c_high[i] > last_price_arr[1]
+        ):
+            if last_state == -1 and not lock_state_1:
+                res_chan_lock[i] = 1
+                res_chan_divide[i] = c_high[i]
+                lock_state_1 = True
+                lock_state_2 = False
+
+            if not np.isnan(chan_state[i]):
+                if last_state == -1 or np.isnan(last_state):
+                    last_high, last_high_idx = chan2_set_state_long(
+                        c_high[i],
+                        i,
+                        last_low,
+                        last_low_idx,
+                        res_chan_state,
+                        res_chan_price,
+                    )
+                    last_state = 1
 
         if last_state == -1:
             last_low, last_low_idx = chan2_get_last_low(
-                chan_price[i], chan_price[last_low_idx], i, last_low_idx
+                c_low[i], c_low[last_low_idx], i, last_low_idx
             )
 
         if (
-            last_state_arr[0] == 1
+            last_state_arr[1] == 1
+            and last_state_arr[2] == -1
+            and last_state_arr[3] == 1
+            and last_price_arr[3] < last_price_arr[1]
+            and c_low[i] < last_price_arr[2]
+        ):
+            if last_state == 1 and not lock_state_2:
+                res_chan_lock[i] = 1
+                res_chan_divide[i] = c_low[i]
+                lock_state_1 = False
+                lock_state_2 = True
+
+            if last_state == 1 or np.isnan(last_state):
+                last_low, last_low_idx = chan2_set_state_short(
+                    last_high,
+                    last_high_idx,
+                    c_low[i],
+                    i,
+                    res_chan_state,
+                    res_chan_price,
+                )
+                last_state = -1
+        elif (
+            not np.isnan(chan_state[i])
+            and last_state_arr[0] == 1
             and last_state_arr[1] == -1
             and last_state_arr[2] == 1
             and last_state_arr[3] == -1
             and last_price_arr[2] < last_price_arr[0]
             and last_price_arr[3] < last_price_arr[1]
+            and c_low[i] < last_price_arr[1]
         ):
-            if last_state == 1 or np.isnan(last_state):
-                last_low, last_low_idx = chan2_set_state_short(
-                    last_high,
-                    last_high_idx,
-                    chan_price[i],
-                    i,
-                    res_chan_state,
-                    res_chan_price,
-                )
-            last_state = -1
+            if last_state == 1 and not lock_state_2:
+                res_chan_lock[i] = 1
+                res_chan_divide[i] = c_low[i]
+                lock_state_1 = False
+                lock_state_2 = True
 
-        n += 1
-    return (res_chan_state, res_chan_price)
+            if not np.isnan(chan_state[i]):
+                if last_state == 1 or np.isnan(last_state):
+                    last_low, last_low_idx = chan2_set_state_short(
+                        last_high,
+                        last_high_idx,
+                        c_low[i],
+                        i,
+                        res_chan_state,
+                        res_chan_price,
+                    )
+                    last_state = -1
+
+        if not np.isnan(chan_state[i]):
+            n += 1
+    return (res_chan_state, res_chan_price, res_chan_lock, res_chan_divide)

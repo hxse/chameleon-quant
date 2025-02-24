@@ -382,11 +382,16 @@ def candlestick_plot(
                 line_color=color_arr[n] if n < len(color_arr) else color_arr[-1],
                 visible=True,
             )
+            if n > 0:
+                fig.scatter(
+                    "index",
+                    c[1:].replace("price", "divide"),
+                    source=source_plot,
+                    size=10,
+                    color=color_arr[n] if n < len(color_arr) else color_arr[-1],
+                    alpha=0.4,
+                )
             n += 1
-        # fig.circle(
-        #     "index", c, source=source_plot, size=5, color="blue", alpha=0.4
-        # )
-
     return [fig, ["high", "low"]]
 
 
