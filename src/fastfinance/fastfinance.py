@@ -1148,16 +1148,16 @@ def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
                 lock_state_1 = True
                 lock_state_2 = False
 
-            if last_state == -1 or np.isnan(last_state):
-                last_high, last_high_idx = chan2_set_state_long(
-                    c_high[i],
-                    i,
-                    last_low,
-                    last_low_idx,
-                    res_chan_state,
-                    res_chan_price,
-                )
-                last_state = 1
+                if last_state == -1 or np.isnan(last_state):
+                    last_high, last_high_idx = chan2_set_state_long(
+                        c_high[i],
+                        i,
+                        last_low,
+                        last_low_idx,
+                        res_chan_state,
+                        res_chan_price,
+                    )
+                    last_state = 1
         elif (
             not np.isnan(chan_state[i])
             and last_state_arr[0] == -1
@@ -1204,16 +1204,16 @@ def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
                 lock_state_1 = False
                 lock_state_2 = True
 
-            if last_state == 1 or np.isnan(last_state):
-                last_low, last_low_idx = chan2_set_state_short(
-                    last_high,
-                    last_high_idx,
-                    c_low[i],
-                    i,
-                    res_chan_state,
-                    res_chan_price,
-                )
-                last_state = -1
+                if last_state == 1 or np.isnan(last_state):
+                    last_low, last_low_idx = chan2_set_state_short(
+                        last_high,
+                        last_high_idx,
+                        c_low[i],
+                        i,
+                        res_chan_state,
+                        res_chan_price,
+                    )
+                    last_state = -1
         elif (
             not np.isnan(chan_state[i])
             and last_state_arr[0] == 1
