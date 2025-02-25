@@ -301,7 +301,13 @@ def add_hover(fig, df_dict):
 
 
 def candlestick_plot(
-    plot_config_item, df_dict, width=800, height=400, width_scale=1, height_scale=0.75
+    plot_config_item,
+    df_dict,
+    width=800,
+    height=400,
+    width_scale=1,
+    height_scale=0.75,
+    plot_params=None,
 ):
     """
     DataFrame 参考格式:
@@ -382,10 +388,11 @@ def candlestick_plot(
                 line_color=color_arr[n] if n < len(color_arr) else color_arr[-1],
                 visible=True,
             )
-            if n > 0:
+            _c = c[1:].replace("price", "break")
+            if _c not in plot_params["display_chan_break"]:
                 fig.scatter(
                     "index",
-                    c[1:].replace("price", "divide"),
+                    _c,
                     source=source_plot,
                     size=10,
                     color=color_arr[n] if n < len(color_arr) else color_arr[-1],
@@ -764,6 +771,7 @@ def layout_plot(
                 width=width,
                 height=height,
                 height_scale=i["height_scale"],
+                plot_params=plot_params,
             )
             fig_array.append(_f[0])
             columns_array.append(_f[1])
