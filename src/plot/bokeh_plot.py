@@ -489,7 +489,7 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
         )
         res_col.append("merge_total")
 
-        if "enable_hold" in plot_params and plot_params["enable_hold"]:
+        if "enable_hold" in plot_params and "long" in plot_params["enable_hold"]:
             fig.line(
                 "index",
                 "long_hold",
@@ -502,6 +502,7 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
             )
             res_col.append("long_hold")
 
+        if "enable_hold" in plot_params and "short" in plot_params["enable_hold"]:
             fig.line(
                 "index",
                 "short_hold",
@@ -531,22 +532,19 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
         )
         res_col.append("long_total")
 
-        if (
-            plot_params["short_count"] == 0
-            and "enable_hold" in plot_params
-            and plot_params["enable_hold"]
-        ):
-            fig.line(
-                "index",
-                "long_hold",
-                source=source_df,
-                line_width=2,
-                line_alpha=1,
-                line_color="orange",
-                # line_dash="dotted",
-                visible=True,
-            )
-            res_col.append("long_hold")
+        if plot_params["short_count"] == 0:
+            if "enable_hold" in plot_params and "long" in plot_params["enable_hold"]:
+                fig.line(
+                    "index",
+                    "long_hold",
+                    source=source_df,
+                    line_width=2,
+                    line_alpha=1,
+                    line_color="orange",
+                    # line_dash="dotted",
+                    visible=True,
+                )
+                res_col.append("long_hold")
 
     if (
         "short_total" in side_arr
@@ -565,22 +563,19 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
         )
         res_col.append("short_total")
 
-        if (
-            plot_params["long_count"] == 0
-            and "enable_hold" in plot_params
-            and plot_params["enable_hold"]
-        ):
-            fig.line(
-                "index",
-                "short_hold",
-                source=source_df,
-                line_width=2,
-                line_alpha=1,
-                line_color="purple",
-                # line_dash="dotted",
-                visible=True,
-            )
-            res_col.append("short_hold")
+        if plot_params["long_count"] == 0:
+            if "enable_hold" in plot_params and "short" in plot_params["enable_hold"]:
+                fig.line(
+                    "index",
+                    "short_hold",
+                    source=source_df,
+                    line_width=2,
+                    line_alpha=1,
+                    line_color="purple",
+                    # line_dash="dotted",
+                    visible=True,
+                )
+                res_col.append("short_hold")
     return res_col
 
 
