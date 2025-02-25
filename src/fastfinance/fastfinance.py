@@ -1048,10 +1048,10 @@ def chan(c_open, c_high, c_low, c_close):
     :rtype: (np.ndarray, np.ndarray)
     :return: chan_state, chan_price
     """
-    chan_state = np.full_like(c_close, np.nan)
-    chan_price = np.full_like(c_close, np.nan)
-    chan_lock = np.full_like(c_close, np.nan)
-    chan_break = np.full_like(c_close, np.nan)
+    res_chan_state = np.full_like(c_close, np.nan)
+    res_chan_price = np.full_like(c_close, np.nan)
+    res_chan_lock = np.full_like(c_close, np.nan)
+    res_chan_break = np.full_like(c_close, np.nan)
     last_state = np.nan
     last_high = np.nan
     last_high_idx = -1
@@ -1071,11 +1071,11 @@ def chan(c_open, c_high, c_low, c_close):
                     i,
                     last_low,
                     last_low_idx,
-                    chan_state,
-                    chan_price,
+                    res_chan_state,
+                    res_chan_price,
                 )
-                chan_lock[i] = 1
-                chan_break[i] = c_high[i]
+                res_chan_lock[i] = 1
+                res_chan_break[i] = c_high[i]
             last_state = 1
 
         if last_state == -1:
@@ -1090,22 +1090,22 @@ def chan(c_open, c_high, c_low, c_close):
                     last_high_idx,
                     c_low[i],
                     i,
-                    chan_state,
-                    chan_price,
+                    res_chan_state,
+                    res_chan_price,
                 )
-                chan_lock[i] = -1
-                chan_break[i] = c_low[i]
+                res_chan_lock[i] = -1
+                res_chan_break[i] = c_low[i]
             last_state = -1
 
-    return (chan_state, chan_price, chan_lock, chan_break)
+    return (res_chan_state, res_chan_price, res_chan_lock, res_chan_break)
 
 
 @jit(nopython=True)
-def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
-    res_chan_state = np.full_like(chan_price, np.nan)
-    res_chan_price = np.full_like(chan_price, np.nan)
-    res_chan_lock = np.full_like(chan_price, np.nan)
-    res_chan_break = np.full_like(chan_price, np.nan)
+def chan2(c_open, c_high, c_low, c_close, c_chan_state, c_chan_price):
+    res_chan_state = np.full_like(c_chan_price, np.nan)
+    res_chan_price = np.full_like(c_chan_price, np.nan)
+    res_chan_lock = np.full_like(c_chan_price, np.nan)
+    res_chan_break = np.full_like(c_chan_price, np.nan)
     last_state = np.nan
     lock_state_1 = False
     lock_state_2 = False
@@ -1116,19 +1116,19 @@ def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
     _l = 4
     last_state_arr = np.zeros(_l)
     last_price_arr = np.zeros(_l)
-    length = len(chan_price)
+    length = len(c_chan_price)
     n = 0
     for i in range(length):
-        if not np.isnan(chan_state[i]):
+        if not np.isnan(c_chan_state[i]):
             if n < _l:
-                last_state_arr[n] = chan_state[i]
-                last_price_arr[n] = chan_price[i]
+                last_state_arr[n] = c_chan_state[i]
+                last_price_arr[n] = c_chan_price[i]
             else:
                 last_state_arr = np.roll(last_state_arr, -1)
-                last_state_arr[-1] = chan_state[i]
+                last_state_arr[-1] = c_chan_state[i]
 
                 last_price_arr = np.roll(last_price_arr, -1)
-                last_price_arr[-1] = chan_price[i]
+                last_price_arr[-1] = c_chan_price[i]
 
         if last_state == 1:
             last_high, last_high_idx = chan2_get_last_high(
@@ -1159,7 +1159,7 @@ def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
                 )
                 last_state = 1
         elif (
-            not np.isnan(chan_state[i])
+            not np.isnan(c_chan_state[i])
             and last_state_arr[0] == -1
             and last_state_arr[1] == 1
             and last_state_arr[2] == -1
@@ -1215,7 +1215,7 @@ def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
                 last_state = -1
 
         elif (
-            not np.isnan(chan_state[i])
+            not np.isnan(c_chan_state[i])
             and last_state_arr[0] == 1
             and last_state_arr[1] == -1
             and last_state_arr[2] == 1
@@ -1241,6 +1241,63 @@ def chan2(c_open, c_high, c_low, c_close, chan_state, chan_price):
                 )
                 last_state = -1
 
-        if not np.isnan(chan_state[i]):
+        if not np.isnan(c_chan_state[i]):
             n += 1
+    return (res_chan_state, res_chan_price, res_chan_lock, res_chan_break)
+
+
+@jit(nopython=True)
+def chan_ma(c_open, c_high, c_low, c_close, c_ma_a):
+    res_chan_state = np.full_like(c_close, np.nan)
+    res_chan_price = np.full_like(c_close, np.nan)
+    res_chan_lock = np.full_like(c_close, np.nan)
+    res_chan_break = np.full_like(c_close, np.nan)
+    last_state = np.nan
+    last_high = np.nan
+    last_high_idx = -1
+    last_low = np.nan
+    last_low_idx = -1
+    length = len(c_close)
+    for i in range(1, length):
+        if np.isnan(c_ma_a[i]):
+            continue
+
+        if last_state == 1:
+            last_high, last_high_idx = chan2_get_last_high(
+                c_high[i], c_high[last_high_idx], i, last_high_idx
+            )
+
+        if c_high[i] > c_ma_a[i] and c_low[i] > c_ma_a[i]:
+            if last_state == -1 or np.isnan(last_state):
+                last_high, last_high_idx = chan2_set_state_long(
+                    c_high[i],
+                    i,
+                    last_low,
+                    last_low_idx,
+                    res_chan_state,
+                    res_chan_price,
+                )
+                res_chan_lock[i] = 1
+                res_chan_break[i] = c_high[i]
+            last_state = 1
+
+        if last_state == -1:
+            last_low, last_low_idx = chan2_get_last_low(
+                c_low[i], c_low[last_low_idx], i, last_low_idx
+            )
+
+        if c_high[i] < c_ma_a[i] and c_low[i] < c_ma_a[i]:
+            if last_state == 1 or np.isnan(last_state):
+                last_low, last_low_idx = chan2_set_state_short(
+                    last_high,
+                    last_high_idx,
+                    c_low[i],
+                    i,
+                    res_chan_state,
+                    res_chan_price,
+                )
+                res_chan_lock[i] = -1
+                res_chan_break[i] = c_low[i]
+            last_state = -1
+
     return (res_chan_state, res_chan_price, res_chan_lock, res_chan_break)
