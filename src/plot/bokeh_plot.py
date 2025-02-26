@@ -378,6 +378,16 @@ def candlestick_plot(
     color_arr = ["brown", "goldenrod", "cornflowerblue", "cyan", "blue", "gray"]
     n = 0
     for c in source_plot.data.keys():
+        if c.startswith("ohlc4"):
+            fig.line(
+                "index",
+                c,
+                source=source_plot,
+                line_width=2,
+                line_alpha=1,
+                line_color="gray",
+                visible=True,
+            )
         if c.startswith("_chan_price"):
             fig.line(
                 "index",
