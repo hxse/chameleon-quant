@@ -165,7 +165,7 @@ def add_indicator(fig, df_dict, plot_params=None):
         )
 
     for i in df.columns:
-        for c in ["CM"]:
+        for c in ["cm"]:
             if c in i:
                 name, suffix = i.rsplit("_", 1)
                 fig.line(
@@ -177,13 +177,13 @@ def add_indicator(fig, df_dict, plot_params=None):
                     line_color="grey",
                     visible=True,
                 )
-        for c in ["CU"]:
+        for c in ["cu"]:
             if c in i:
                 name, suffix = i.rsplit("_", 1)
                 band = Band(
                     base="index",
-                    lower=f"CL_{suffix}" if name == "CU" else f"CL_{suffix}",
-                    upper=f"CU_{suffix}" if name == "CU" else f"CU_{suffix}",
+                    lower=f"cl_{suffix}" if name == "cu" else f"cl_{suffix}",
+                    upper=f"cu_{suffix}" if name == "cu" else f"cu_{suffix}",
                     source=source_plot,
                     fill_alpha=0.03,
                     fill_color="blue",
