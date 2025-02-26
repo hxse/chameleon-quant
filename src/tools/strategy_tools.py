@@ -81,9 +81,9 @@ def init_df(df):
 
 def set_ma(df, length, ma_mode="sma", suffix="a"):
     if ma_mode == "sma":
-        df[f"{ma_mode}_{suffix}"] = ta.sma(df["close"], length=length)
+        df[f"ma_{suffix}"] = ta.sma(df["close"], length=length)
     if ma_mode == "ema":
-        df[f"{ma_mode}_{suffix}"] = ta.ema(df["close"], length=length)
+        df[f"ma_{suffix}"] = ta.ema(df["close"], length=length)
 
 
 def set_channel(
@@ -97,15 +97,15 @@ def set_channel(
         bbands = ta.bbands(
             df["close"], length=channel_length, std=channel_std, mamode=mamode
         )
-        df[f"CL_{suffix}"] = bbands[f"BBL_{channel_length}_{channel_std}"]
-        df[f"CM_{suffix}"] = bbands[f"BBM_{channel_length}_{channel_std}"]
-        df[f"CU_{suffix}"] = bbands[f"BBU_{channel_length}_{channel_std}"]
-        df[f"CB_{suffix}"] = bbands[f"BBB_{channel_length}_{channel_std}"]
-        df[f"CP_{suffix}"] = bbands[f"BBP_{channel_length}_{channel_std}"]
+        df[f"cl_{suffix}"] = bbands[f"BBL_{channel_length}_{channel_std}"]
+        df[f"cm_{suffix}"] = bbands[f"BBM_{channel_length}_{channel_std}"]
+        df[f"cu_{suffix}"] = bbands[f"BBU_{channel_length}_{channel_std}"]
+        df[f"cb_{suffix}"] = bbands[f"BBB_{channel_length}_{channel_std}"]
+        df[f"cp_{suffix}"] = bbands[f"BBP_{channel_length}_{channel_std}"]
         if drop_middle:
-            df.drop([f"CM_{suffix}"], axis=1, inplace=True)
-            df.drop([f"CB_{suffix}"], axis=1, inplace=True)
-            df.drop([f"CP_{suffix}"], axis=1, inplace=True)
+            df.drop([f"cm_{suffix}"], axis=1, inplace=True)
+            df.drop([f"cb_{suffix}"], axis=1, inplace=True)
+            df.drop([f"cp_{suffix}"], axis=1, inplace=True)
 
     if mode == "kc":
         kc = ta.kc(
@@ -116,9 +116,9 @@ def set_channel(
             scalar=channel_std,
             mamode=mamode,
         )
-        df[f"CL_{suffix}"] = kc[f"KCL{mamode[0]}_{channel_length}_{channel_std}"]
-        df[f"CM_{suffix}"] = kc[f"KCB{mamode[0]}_{channel_length}_{channel_std}"]
-        df[f"CU_{suffix}"] = kc[f"KCU{mamode[0]}_{channel_length}_{channel_std}"]
+        df[f"cl_{suffix}"] = kc[f"KCL{mamode[0]}_{channel_length}_{channel_std}"]
+        df[f"cm_{suffix}"] = kc[f"KCB{mamode[0]}_{channel_length}_{channel_std}"]
+        df[f"cu_{suffix}"] = kc[f"KCU{mamode[0]}_{channel_length}_{channel_std}"]
         if drop_middle:
             df.drop([f"CM_{suffix}"], axis=1, inplace=True)
 
@@ -129,11 +129,11 @@ def set_channel(
             lower_length=channel_length,
             upper_length=channel_length,
         )
-        df[f"CL_{suffix}"] = kc[f"DCL_{channel_length}_{channel_length}"]
-        df[f"CM_{suffix}"] = kc[f"DCM_{channel_length}_{channel_length}"]
-        df[f"CU_{suffix}"] = kc[f"DCU_{channel_length}_{channel_length}"]
+        df[f"cl_{suffix}"] = kc[f"DCL_{channel_length}_{channel_length}"]
+        df[f"cm_{suffix}"] = kc[f"DCM_{channel_length}_{channel_length}"]
+        df[f"cu_{suffix}"] = kc[f"DCU_{channel_length}_{channel_length}"]
         if drop_middle:
-            df.drop([f"CM_{suffix}"], axis=1, inplace=True)
+            df.drop([f"cm_{suffix}"], axis=1, inplace=True)
 
 
 def set_macd(df, macd_fast, macd_slow, macd_signal):
@@ -148,7 +148,9 @@ def set_macd(df, macd_fast, macd_slow, macd_signal):
 def set_rsi(df, length, rsi_smooth=None, ma_mode="ema", suffix="a"):
     df[f"rsi_{suffix}"] = ta.rsi(df["close"], length=length)
     if rsi_smooth:
-        df[f"rsi_{suffix}"] = getattr(ta, ma_mode)(df["rsi_a"], length=rsi_smooth)
+        df[f"rsi_{suffix}"] = getattr(ta, ma_mode)(
+            df[f"rsi_{suffix}"], length=rsi_smooth
+        )
 
 
 def set_adx(df, length, mamode="rma", suffix="a", drop=[]):
