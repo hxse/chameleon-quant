@@ -141,7 +141,7 @@ def add_indicator(fig, df_dict, plot_params=None):
         )
 
     color = ["orange", "green", "blue", "purple", "grey"]
-    for k, v in enumerate([i for i in df.columns if "ma" in i]):
+    for k, v in enumerate([i for i in df.columns if "ma_" in i]):
         fig.line(
             "index",
             v,
