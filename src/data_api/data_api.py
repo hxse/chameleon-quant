@@ -127,7 +127,7 @@ def test_data(df, config, strategy_params):
     assert _ == period_dict[period] * 60 * 1000, "发现数据间隔不对"
 
 
-def test_connect_api(config, strategy_params, sleep=60):
+def test_connect_api(config, strategy_params, sleep=30):
     try:
         exchange = connect_api(config, strategy_params)
         balance_obj = get_balance(exchange)
