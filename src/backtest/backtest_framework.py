@@ -49,6 +49,11 @@ def get_plot_config(df):
     if len(adx_columns) > 0:
         plot_config.insert(1, _p)
 
+    _p = {"name": "slope", "key": ["zscore"], "show": True}
+    slope_columns = filter_columns(_p["key"], df.columns)
+    if len(slope_columns) > 0:
+        plot_config.insert(1, _p)
+
     scale_arr = height_scale_arr[len(plot_config) - 2]
     assert len(scale_arr) == len(plot_config), "need equal length"
     for k, v in enumerate(scale_arr):

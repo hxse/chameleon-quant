@@ -160,3 +160,7 @@ def set_adx(df, length, mamode="rma", suffix="a", drop=[]):
     df[f"dmn_{suffix}"] = adx[f"DMN_{length}"]
     for i in drop:
         df.drop([f"{i}_{suffix}"], axis=1, inplace=True)
+
+
+def set_zscore(df, length, std=1):
+    df["zscore"] = ta.zscore(df["close"], length, std)
