@@ -4,6 +4,7 @@ import numpy as np
 # Still getting "cannot import name 'NaN' from numpy" error
 # https://github.com/twopirllc/pandas-ta/issues/857
 import pandas_ta as ta
+import fastfinance.fastfinance as ff
 
 
 def gt(a, b):
@@ -84,6 +85,8 @@ def set_ma(df, length, ma_mode="sma", suffix="a"):
         df[f"ma_{suffix}"] = ta.sma(df["close"], length=length)
     if ma_mode == "ema":
         df[f"ma_{suffix}"] = ta.ema(df["close"], length=length)
+    if ma_mode == "jma":
+        df[f"ma_{suffix}"] = ff.jma(df["close"], length=length)
 
 
 def set_channel(

@@ -27,6 +27,7 @@ from math import fabs
 import numpy as np
 from numba import jit
 from numba.extending import overload
+from .jma import jma
 
 
 @overload(np.clip)
