@@ -28,6 +28,7 @@ import numpy as np
 from numba import jit
 from numba.extending import overload
 from .jma import jma
+from .lrsi import optimized_lrsi as lrsi
 
 
 @overload(np.clip)

@@ -39,6 +39,11 @@ def get_plot_config(df):
     if len(rsi_columns) > 0:
         plot_config.insert(1, _p)
 
+    _p = {"name": "lrsi", "key": ["lrsi"], "show": True}
+    rsi_columns = filter_columns(_p["key"], df.columns)
+    if len(rsi_columns) > 0:
+        plot_config.insert(1, _p)
+
     _p = {"name": "macd", "key": ["macd"], "show": True}
     macd_columns = filter_columns(_p["key"], df.columns)
     if len(macd_columns) > 0:

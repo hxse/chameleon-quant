@@ -156,6 +156,10 @@ def set_rsi(df, length, rsi_smooth=None, ma_mode="ema", suffix="a"):
         )
 
 
+def set_lrsi(df, gamma=0.5, suffix="a"):
+    df[f"lrsi_{suffix}"] = ff.lrsi(df["close"], gamma=gamma)
+
+
 def set_adx(df, length, mamode="rma", suffix="a", drop=[]):
     adx = ta.adx(df["high"], df["low"], df["close"], length=length, mamode=mamode)
     df[f"adx_{suffix}"] = adx[f"ADX_{length}"]
