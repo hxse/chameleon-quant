@@ -2,7 +2,7 @@ import pandas as pd
 import json
 from pathlib import Path
 import ccxt
-
+import math
 
 amount_dict = {
     "binance": {
@@ -108,23 +108,53 @@ def get_ticker(exchange, symbol):
     return price
 
 
-def get_amount(exchange, exchange_name, symbol, price, size, leverage):
-    # market = exchange.market(symbol)
-    # cost_min = market["limits"]["cost"]["min"]
-    # amount_min = market["limits"]["amount"]["min"]
-
-    amount = size * leverage / price
-
-    minimum = amount_dict[exchange_name][symbol]["minimum"]
-    _round = amount_dict[exchange_name][symbol]["round"]
-
-    if amount >= 1:
-        amount = round(amount, _round)
-    elif amount < 1 and amount >= minimum:
-        amount = round(amount, _round)
+def get_round(amount):
+    seg = "{:.10f}".format(float(amount)).rstrip("0").split(".")
+    if len(seg) > 1:
+        return len(seg[1])
     else:
-        amount = minimum
-    return amount
+        return 0
+
+
+def ceil_to_decimal(number, decimals=0):
+    factor = 10**decimals
+    return math.ceil(number * factor) / factor
+
+
+def floor_to_decimal(number, decimals=0):
+    factor = 10**decimals
+    return math.floor(number * factor) / factor
+
+
+def get_min(exchange, exchange_name, symbol, price, mode=2):
+    if mode == 1:
+        minimum = amount_dict[exchange_name][symbol]["minimum"]
+        _round = amount_dict[exchange_name][symbol]["round"]
+        return minimum, _round
+    if mode == 2:
+        market = exchange.market(symbol)
+        minimum = market["limits"]["market"]["min"]
+        cost = market["limits"]["cost"]["min"]
+        _round = get_round(minimum)
+        req_min = max(minimum, cost / price)
+        _req_min = floor_to_decimal(req_min, _round)
+        if _req_min * price < cost:
+            req_min = ceil_to_decimal(req_min, _round)
+        else:
+            req_min = _req_min
+        return req_min, _round
+
+
+def get_amount(exchange, exchange_name, symbol, price, fund, leverage):
+    fund = fund * leverage
+    amount = fund / price
+
+    minimum, _round = get_min(exchange, exchange_name, symbol, price)
+
+    amount = floor_to_decimal(amount, _round)
+    res = amount if amount >= minimum else minimum
+    # print("res", res, "amount", amount, "minium", minimum)
+    return res
 
 
 def create_order(exchange, symbol, side, amount):
