@@ -27,8 +27,11 @@ from math import fabs
 import numpy as np
 from numba import jit
 from numba.extending import overload
+
 from .jma import jma
 from .lrsi import optimized_lrsi as lrsi
+from .renko import renko_like as renko
+from .hma import hma
 
 
 @overload(np.clip)

@@ -113,6 +113,14 @@ def get_source_plot(df):
         df.loc[df["macdh"] <= 0, "macdh_inc"] = np.nan
         df.loc[df["macdh"] > 0, "macdh_dec"] = np.nan
 
+    renko_columns = [
+        i for i in df.columns if i.startswith("renko") and not i.startswith("_")
+    ]
+    if len(renko_columns) > 0:
+        df["_renko_state"] = df["renko_brick"]
+        df.loc[df["renko_state"] == 0, "_renko_state"] = np.nan
+        df[f"_renko_state"] = df[f"_renko_state"].interpolate(method="linear")
+
     source = ColumnDataSource(data=df)
     return source
 
@@ -409,6 +417,17 @@ def candlestick_plot(
                     alpha=0.4,
                 )
             n += 1
+    for c in source_plot.data.keys():
+        if c.startswith("_renko_state"):
+            fig.line(
+                "index",
+                c,
+                source=source_plot,
+                line_width=2,
+                line_alpha=1,
+                line_color="gray",
+                visible=True,
+            )
     return [fig, ["high", "low"]]
 
 

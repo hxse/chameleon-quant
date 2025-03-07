@@ -80,17 +80,19 @@ def init_df(df):
     df["short_hold"] = -df["long_hold"]
 
 
-def set_ma(df, length, ma_mode="sma", suffix="a"):
+def set_ma(df, length, ma_mode="ema", suffix="a"):
     if ma_mode == "sma":
         df[f"ma_{suffix}"] = ta.sma(df["close"], length=length)
     if ma_mode == "ema":
         df[f"ma_{suffix}"] = ta.ema(df["close"], length=length)
+    if ma_mode == "hma":
+        df[f"ma_{suffix}"] = ff.hma(df["close"], length=length)
     if ma_mode == "jma":
         df[f"ma_{suffix}"] = ff.jma(df["close"], length=length)
 
 
 def set_channel(
-    mode, df, channel_length, channel_std, mamode="ema", suffix="a", drop_middle=False
+    mode, df, channel_length, channel_std, ma_mode="ema", suffix="a", drop_middle=False
 ):
     """
     bbands, kc : channel_length channel_std mamode suffix
@@ -98,7 +100,7 @@ def set_channel(
     """
     if mode == "bbands":
         bbands = ta.bbands(
-            df["close"], length=channel_length, std=channel_std, mamode=mamode
+            df["close"], length=channel_length, std=channel_std, mamode=ma_mode
         )
         df[f"cl_{suffix}"] = bbands[f"BBL_{channel_length}_{channel_std}"]
         df[f"cm_{suffix}"] = bbands[f"BBM_{channel_length}_{channel_std}"]
@@ -117,11 +119,11 @@ def set_channel(
             df["close"],
             length=channel_length,
             scalar=channel_std,
-            mamode=mamode,
+            mamode=ma_mode,
         )
-        df[f"cl_{suffix}"] = kc[f"KCL{mamode[0]}_{channel_length}_{channel_std}"]
-        df[f"cm_{suffix}"] = kc[f"KCB{mamode[0]}_{channel_length}_{channel_std}"]
-        df[f"cu_{suffix}"] = kc[f"KCU{mamode[0]}_{channel_length}_{channel_std}"]
+        df[f"cl_{suffix}"] = kc[f"KCL{ma_mode[0]}_{channel_length}_{channel_std}"]
+        df[f"cm_{suffix}"] = kc[f"KCB{ma_mode[0]}_{channel_length}_{channel_std}"]
+        df[f"cu_{suffix}"] = kc[f"KCU{ma_mode[0]}_{channel_length}_{channel_std}"]
         if drop_middle:
             df.drop([f"CM_{suffix}"], axis=1, inplace=True)
 
@@ -148,20 +150,16 @@ def set_macd(df, macd_fast, macd_slow, macd_signal):
     df["macdh"] = macd[f"MACDh_{macd_fast}_{macd_slow}_{macd_signal}"]
 
 
-def set_rsi(df, length, rsi_smooth=None, ma_mode="ema", suffix="a"):
+def set_rsi(df, length, suffix="a"):
     df[f"rsi_{suffix}"] = ta.rsi(df["close"], length=length)
-    if rsi_smooth:
-        df[f"rsi_{suffix}"] = getattr(ta, ma_mode)(
-            df[f"rsi_{suffix}"], length=rsi_smooth
-        )
 
 
 def set_lrsi(df, gamma=0.5, suffix="a"):
     df[f"lrsi_{suffix}"] = ff.lrsi(df["close"], gamma=gamma)
 
 
-def set_adx(df, length, mamode="rma", suffix="a", drop=[]):
-    adx = ta.adx(df["high"], df["low"], df["close"], length=length, mamode=mamode)
+def set_adx(df, length, ma_mode="rma", suffix="a", drop=[]):
+    adx = ta.adx(df["high"], df["low"], df["close"], length=length, mamode=ma_mode)
     df[f"adx_{suffix}"] = adx[f"ADX_{length}"]
     df[f"dmp_{suffix}"] = adx[f"DMP_{length}"]
     df[f"dmn_{suffix}"] = adx[f"DMN_{length}"]
@@ -171,3 +169,9 @@ def set_adx(df, length, mamode="rma", suffix="a", drop=[]):
 
 def set_zscore(df, length, std=1):
     df["zscore"] = ta.zscore(df["close"], length, std)
+
+
+def set_renko(df, brick_size):
+    result = ff.renko(df["close"], brick_size=brick_size)
+    df["renko_state"] = result["renko_state"]
+    df["renko_brick"] = result["renko_brick"]
