@@ -47,6 +47,14 @@ def cross_down2(a, b):
     return (a < b) & (a.shift() >= b)
 
 
+def out_nan(a):
+    return ~np.isnan(a) & np.isnan(a.shift())
+
+
+def in_nan(a):
+    return np.isnan(a) & ~np.isnan(a.shift())
+
+
 def init_df(df):
     df["is_nan"] = False
 
@@ -175,3 +183,16 @@ def set_renko(df, brick_size):
     result = ff.renko(df["close"], brick_size=brick_size)
     df["renko_state"] = result["renko_state"]
     df["renko_brick"] = result["renko_brick"]
+
+
+def set_super_trend(df, length, multiple):
+    super_trend = ff.super_trend(
+        df["close"].values,
+        df["open"].values,
+        df["high"].values,
+        df["low"].values,
+        period_atr=length,
+        multi=multiple,
+    )
+    df["st_up"] = super_trend[0]
+    df["st_down"] = super_trend[1]

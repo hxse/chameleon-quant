@@ -14,21 +14,23 @@ def compute_renko(close, brick_size):
 
     for i in range(1, len(close)):
         price_change = close[i] - renko_brick[i - 1]
-        brick_count = int(np.floor(price_change / brick_size))
-        renko_count[i] = brick_count
-
         if price_change >= brick_size:
             renko_state[i] = 1
-            renko_brick[i] = renko_brick[i - 1] + brick_size  # 只移动一个 brick_size
+            brick_count = int(np.floor(price_change / brick_size))  # 上升：向下取整
+            renko_brick[i] = renko_brick[i - 1] + (brick_count * brick_size)
+            renko_count[i] = brick_count
         elif price_change <= -brick_size:
             renko_state[i] = -1
-            renko_brick[i] = renko_brick[i - 1] - brick_size  # 只移动一个 brick_size
+            brick_count = int(np.ceil(price_change / brick_size))  # 下降：向上取整负数
+            renko_brick[i] = renko_brick[i - 1] + (brick_count * brick_size)
+            renko_count[i] = brick_count
         else:
             renko_state[i] = 0
             renko_brick[i] = renko_brick[i - 1]
+            renko_count[i] = 0
 
         print(
-            f"i={i}, price={close[i]}, prev_brick={renko_brick[i-1]}, price_change={price_change}, renko_count={brick_count}, renko_state={renko_state[i]}, new_brick={renko_brick[i]}"
+            f"i={i}, price={close[i]}, prev_brick={renko_brick[i-1]}, price_change={price_change}, renko_count={renko_count[i]}, renko_state={renko_state[i]}, new_brick={renko_brick[i]}"
         )
 
     return renko_state, renko_brick, renko_count
@@ -51,6 +53,7 @@ def renko_like(close, brick_size=0.01, name="RENKO", input_col="close"):
 
 
 if __name__ == "__main__":
+
     # 测试数据
     dates = pd.date_range(start="2023-01-01", periods=10, freq="D")
     prices = [100.0, 101.5, 102.8, 101.2, 103.0, 104.5, 102.0, 100.5, 99.0, 101.2]
