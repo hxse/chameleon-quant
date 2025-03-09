@@ -87,6 +87,31 @@ def init_df(df):
     df["long_hold"] = df["close"] - df.iloc[0]["close"]
     df["short_hold"] = -df["long_hold"]
 
+    if np.any(np.isnan(df[["open", "high", "low", "close"]].values)):
+        raise ValueError("Input OHLC data contains NaN")
+
+
+def verify_df(df, long_enter, short_enter, long_exit, short_exit):
+    df.loc[long_enter, "long_status"] = 1
+    df.loc[short_enter, "short_status"] = 1
+    df.loc[long_enter == 1, "short_status"] = -1
+    df.loc[short_enter == 1, "long_status"] = -1
+    df.loc[long_exit, "long_status"] = 0
+    df.loc[short_exit, "short_status"] = 0
+    df.loc[df["is_nan"], "short_status"] = -1
+    df.loc[df["is_nan"], "long_status"] = -1
+
+
+def verify_result(result):
+    assert (
+        result["conflict_count"] == 0
+    ), "Avoid opening a short position at the same time"
+    assert (
+        result["repeat_count"] == 0
+    ), "Avoid opening a short position at the same time"
+    assert result["long_status_out_count"] == 0, "only allow -1,0,1,2"
+    assert result["short_status_out_count"] == 0, "only allow -1,0,1,2"
+
 
 def set_ma(df, length, ma_mode="ema", suffix="a"):
     if ma_mode == "sma":

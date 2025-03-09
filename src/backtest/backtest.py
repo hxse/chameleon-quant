@@ -269,6 +269,17 @@ def run_backtest_warp(
     conflict_count = df["conflict"].count()
     df.drop(["conflict"], axis=1, inplace=True)
 
+    _status_array = [-1, 0, 1, 2]
+    df["long_status_out"] = np.nan
+    df.loc[~df["long_status"].isin(_status_array), "long_status_out"] = 1
+    long_status_out_count = df["long_status_out"].count()
+    df.drop(["long_status_out"], axis=1, inplace=True)
+
+    df["short_status_out"] = np.nan
+    df.loc[~df["short_status"].isin(_status_array), "short_status_out"] = 1
+    short_status_out_count = df["short_status_out"].count()
+    df.drop(["short_status_out"], axis=1, inplace=True)
+
     return {
         "total": df.iloc[-1]["merge_total"],
         "count": count,
@@ -278,4 +289,6 @@ def run_backtest_warp(
         "repeat_count": repeat_count,
         "conflict_count": conflict_count,
         "candle_count": len(df),
+        "long_status_out_count": long_status_out_count,
+        "short_status_out_count": short_status_out_count,
     }
