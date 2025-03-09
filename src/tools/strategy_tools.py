@@ -90,6 +90,12 @@ def init_df(df):
     if np.any(np.isnan(df[["open", "high", "low", "close"]].values)):
         raise ValueError("Input OHLC data contains NaN")
 
+    long_enter = pd.Series(False, index=df.index)
+    short_enter = pd.Series(False, index=df.index)
+    long_exit = pd.Series(False, index=df.index)
+    short_exit = pd.Series(False, index=df.index)
+    return df, long_enter, short_enter, long_exit, short_exit
+
 
 def verify_df(df, long_enter, short_enter, long_exit, short_exit):
     df.loc[long_enter, "long_status"] = 1
