@@ -56,7 +56,7 @@ def run_backtest(
     merge_n = 0
     merge_n2 = 0
     for idx in range(len(index_list)):
-        if idx == 0:
+        if idx == 0:  # 避免越界
             merge_total_list[idx] = 0.0
             merge_price_list[idx] = np.nan
             merge_diff_list[idx] = np.nan

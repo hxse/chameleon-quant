@@ -29,7 +29,7 @@ def run_short(
 ):
     [idx, n, n2, last_idx, pole_idx] = _array
 
-    if idx == 0:
+    if idx == 0:  # 避免越界
         if status_list[idx] == 1:
             last_idx = idx
             pole_idx = idx
