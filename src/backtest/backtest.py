@@ -56,6 +56,13 @@ def run_backtest(
     merge_n = 0
     merge_n2 = 0
     for idx in range(len(index_list)):
+        if idx == 0:
+            merge_total_list[idx] = 0.0
+            merge_price_list[idx] = np.nan
+            merge_diff_list[idx] = np.nan
+            merge_idx_list[idx] = -1
+            merge_idx2_list[idx] = -1
+
         if is_nan_list[idx]:
             continue
 
@@ -63,6 +70,7 @@ def run_backtest(
 
         if (
             long_status_list[idx] == 1
+            and idx > 0  # 避免越界
             and (short_status_list[idx - 1] == 1 or short_status_list[idx - 1] == 2)
             and merge
         ):
@@ -98,6 +106,7 @@ def run_backtest(
 
         if (
             short_status_list[idx] == 1
+            and idx > 0  # 避免越界
             and (long_status_list[idx - 1] == 1 or long_status_list[idx - 1] == 2)
             and merge
         ):

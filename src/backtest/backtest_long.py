@@ -29,6 +29,16 @@ def run_long(
 ):
     [idx, n, n2, last_idx, pole_idx] = _array
 
+    if idx == 0:
+        if status_list[idx] == 1:
+            last_idx = idx
+            pole_idx = idx
+            n = 0
+            n2 += 1
+            price_list[idx] = close_list[idx]
+        _array = [idx, n, n2, last_idx, pole_idx]
+        return _array
+
     if status_list[idx] == 0 and (
         status_list[idx - 1] == -1 or status_list[idx - 1] == 0
     ):
