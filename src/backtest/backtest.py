@@ -195,6 +195,10 @@ def run_backtest(
 def run_backtest_warp(
     df, atr_sl=1, atr_tp=0, atr_tsl=1, sltp_limit=True, tsl_pole=True, merge=True
 ):
+    # import os
+
+    # print(f"run_backtest_warp process {os.getpid()}") # It should only be displayed once
+
     run_backtest(
         df.index.values.astype("float64"),
         df.open.values,
