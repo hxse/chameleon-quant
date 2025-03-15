@@ -124,8 +124,10 @@ def verify_df(df, long_enter, short_enter, long_exit, short_exit):
 
     merge_cols = ["merge_price", "merge_diff", "merge_total", "merge_idx", "merge_idx2"]
 
+    indicator = ["st_up", "st_down"]
+
     df["is_nan"] = (
-        df[df.columns.difference([*long_cols, *short_cols, *merge_cols])]
+        df[df.columns.difference([*long_cols, *short_cols, *merge_cols, *indicator])]
         .isna()
         .any(axis=1)
     )
@@ -141,12 +143,12 @@ def verify_df(df, long_enter, short_enter, long_exit, short_exit):
 
 
 def verify_result(result):
-    assert (
-        result["conflict_count"] == 0
-    ), "Avoid opening a short position at the same time"
-    assert (
-        result["repeat_count"] == 0
-    ), "Avoid opening a short position at the same time"
+    assert result["conflict_count"] == 0, (
+        "Avoid opening a short position at the same time"
+    )
+    assert result["repeat_count"] == 0, (
+        "Avoid opening a short position at the same time"
+    )
     assert result["long_status_out_count"] == 0, "only allow -1,0,1,2"
     assert result["short_status_out_count"] == 0, "only allow -1,0,1,2"
 
@@ -160,6 +162,10 @@ def set_ma(df, length, ma_mode="ema", suffix="a"):
         df[f"ma_{suffix}"] = ff.hma(df["close"], length=length)
     if ma_mode == "jma":
         df[f"ma_{suffix}"] = ff.jma(df["close"], length=length)
+
+
+def set_atr(df, length):
+    df["atr"] = ta.atr(df["high"], df["low"], df["close"], length=length)
 
 
 def set_channel(

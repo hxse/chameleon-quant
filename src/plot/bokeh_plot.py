@@ -976,7 +976,7 @@ def create_x_range(fig, df_dict, fig_array=[], columns_array=[]):
         }
 
         console.log(cb_obj.start,cb_obj.end)
-    },150); //ms
+    },300); //ms
 
     """,
     )
