@@ -20,14 +20,20 @@ def fetch_ohlcv(exchange, symbol, period, since, limit):
 
 def _get_data(exchange, ohlcv_df, symbol, period, count, limit):
     print(f"get data: {limit} exist: {len(ohlcv_df)} count: {count}")
+
+    # 获取最新数据的时间戳
     from_ts = int(ohlcv_df.iloc[-1][0])
+
+    # 获取新的 K 线数据
     new_ohlcv = fetch_ohlcv(exchange, symbol, period, since=from_ts, limit=limit)
-    new_ohlcv_df = pd.DataFrame(new_ohlcv)
-    new_ohlcv_df.drop(index=new_ohlcv_df.index[0], axis=0, inplace=True)
-    ohlcv_df = pd.concat(
-        [ohlcv_df.set_index(0), new_ohlcv_df.set_index(0)], axis=0, join="outer"
-    )
-    ohlcv_df.reset_index(inplace=True)
+    new_ohlcv_df = pd.DataFrame(new_ohlcv)  # 直接使用 fetch_ohlcv 返回的数字列名
+
+    # 删除新数据的第一行，避免重复数据
+    new_ohlcv_df = new_ohlcv_df.iloc[1:]
+
+    # 合并数据并重置索引
+    ohlcv_df = pd.concat([ohlcv_df, new_ohlcv_df], axis=0, ignore_index=True)
+
     return ohlcv_df
 
 

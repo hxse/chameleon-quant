@@ -1,7 +1,7 @@
 import numba
 import numpy as np
-from backtest.backtest_long import run_long
-from backtest.backtest_short import run_short
+from .backtest_long import run_long
+from .backtest_short import run_short
 
 
 @numba.jit(nopython=True, cache=True)

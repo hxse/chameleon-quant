@@ -98,6 +98,38 @@ def init_df(df):
 
 
 def verify_df(df, long_enter, short_enter, long_exit, short_exit):
+    long_cols = [
+        "long_status",
+        "long_idx",
+        "long_idx2",
+        "long_price",
+        "long_diff",
+        "long_total",
+        "long_sl",
+        "long_tp",
+        "long_tsl",
+    ]
+
+    short_cols = [
+        "short_status",
+        "short_idx",
+        "short_idx2",
+        "short_price",
+        "short_diff",
+        "short_total",
+        "short_sl",
+        "short_tp",
+        "short_tsl",
+    ]
+
+    merge_cols = ["merge_price", "merge_diff", "merge_total", "merge_idx", "merge_idx2"]
+
+    df["is_nan"] = (
+        df[df.columns.difference([*long_cols, *short_cols, *merge_cols])]
+        .isna()
+        .any(axis=1)
+    )
+
     df.loc[long_enter, "long_status"] = 1
     df.loc[short_enter, "short_status"] = 1
     df.loc[long_enter == 1, "short_status"] = -1

@@ -32,15 +32,16 @@ def get_df_dict(df, plot_params={}):
     _ = {}
     if "split_dict" in plot_params and len(plot_params["split_dict"].keys()) > 0:
         split_dict = plot_params["split_dict"]
-        train_stop = split_dict["train_stop"]
-        valid_start = split_dict["valid_start"]
-        valid_stop = split_dict["valid_stop"]
-        test_start = split_dict["test_start"]
-        test_stop = split_dict["test_stop"]
-        source_valid = ColumnDataSource(data=df[valid_start:valid_stop])
-        source_test = ColumnDataSource(data=df[test_start:test_stop])
-        _["source_valid"] = source_valid
-        _["source_test"] = source_test
+        if "valid_start" in plot_params["split_dict"]:
+            valid_start = split_dict["valid_start"]
+            valid_stop = split_dict["valid_stop"]
+            source_valid = ColumnDataSource(data=df[valid_start:valid_stop])
+            _["source_valid"] = source_valid
+        if "test_start" in plot_params["split_dict"]:
+            test_start = split_dict["test_start"]
+            test_stop = split_dict["test_stop"]
+            source_test = ColumnDataSource(data=df[test_start:test_stop])
+            _["source_test"] = source_test
 
     source_plot = get_source_plot(df)
 
@@ -339,7 +340,11 @@ def candlestick_plot(
         x_axis_type="datetime",
         width=int(width * width_scale),
         height=int(height * height_scale),
-        output_backend="webgl",
+        output_backend=plot_params.get("output_backend", "webgl"),
+        lod_factor=plot_params.get("lod_factor", 10),  # 每 10 个像素一个数据点
+        lod_threshold=plot_params.get(
+            "lod_threshold", 1000
+        ),  # 数据点少于 100 时禁用 LOD
     )
 
     # inc = df.close > df.open
@@ -449,7 +454,7 @@ def line_plot(
     source_plot = df_dict["source_plot"]
 
     fig = figure(
-        name=f'{plot_config_item["name"]}_plot',
+        name=f"{plot_config_item['name']}_plot",
         sizing_mode="scale_width",
         tools="xpan,reset,xwheel_zoom,undo,redo,save",  # crosshair
         active_drag="xpan",
@@ -457,7 +462,11 @@ def line_plot(
         x_axis_type="datetime",
         width=int(width * width_scale),
         height=int(height * height_scale),
-        output_backend="webgl",
+        output_backend=plot_params.get("output_backend", "webgl"),
+        lod_factor=plot_params.get("lod_factor", 10),  # 每 10 个像素一个数据点
+        lod_threshold=plot_params.get(
+            "lod_threshold", 1000
+        ),  # 数据点少于 100 时禁用 LOD
     )
 
     color = ["orange", "green", "blue", "purple", "grey"]
@@ -506,7 +515,6 @@ def add_total(fig, source_df, plot_params, side_arr=[]):
         and "short_count" in plot_params
         and plot_params["short_count"] > 0
     ):
-
         fig.line(
             "index",
             "merge_total",
@@ -655,7 +663,11 @@ def backtest_plot(
         x_axis_type="datetime",
         width=int(width * width_scale),
         height=int(height * height_scale),
-        output_backend="webgl",
+        output_backend=plot_params.get("output_backend", "webgl"),
+        lod_factor=plot_params.get("lod_factor", 10),  # 每 10 个像素一个数据点
+        lod_threshold=plot_params.get(
+            "lod_threshold", 1000
+        ),  # 数据点少于 100 时禁用 LOD
     )
 
     if not ("split_dict" in plot_params and len(plot_params["split_dict"].keys()) > 0):
@@ -666,13 +678,6 @@ def backtest_plot(
             side_arr=["merge_total", "long_total", "short_total"],
         )
     else:
-        split_dict = plot_params["split_dict"]
-        train_stop = split_dict["train_stop"]
-        valid_start = split_dict["valid_start"]
-        valid_stop = split_dict["valid_stop"]
-        test_start = split_dict["test_start"]
-        test_stop = split_dict["test_stop"]
-
         # source = ColumnDataSource(data=df_dict)
 
         if plot_params.get("span_mode", True):
@@ -682,25 +687,36 @@ def backtest_plot(
                 plot_params,
                 side_arr=["merge_total", "long_total", "short_total"],
             )
-            dst_end = Span(
-                location=train_stop,
-                dimension="height",
-                line_color="green",
-                line_width=6,
-                line_alpha=0.6,
-            )
-            fig.add_layout(dst_end)
 
-            dst_end = Span(
-                location=valid_stop,
-                dimension="height",
-                line_color="green",
-                line_width=6,
-                line_alpha=0.6,
-            )
-            fig.add_layout(dst_end)
+            if (
+                "split_dict" in plot_params
+                and "valid_start" in plot_params["split_dict"]
+            ):
+                valid_start = plot_params["split_dict"]["valid_start"]
+                dst_end = Span(
+                    location=valid_start,
+                    dimension="height",
+                    line_color="green",
+                    line_width=6,
+                    line_alpha=0.6,
+                )
+                fig.add_layout(dst_end)
+
+            if (
+                "split_dict" in plot_params
+                and "test_start" in plot_params["split_dict"]
+            ):
+                test_start = plot_params["split_dict"]["test_start"]
+                # valid_stop = plot_params["split_dict"]["valid_stop"]
+                dst_end = Span(
+                    location=test_start,
+                    dimension="height",
+                    line_color="green",
+                    line_width=6,
+                    line_alpha=0.6,
+                )
+                fig.add_layout(dst_end)
         else:
-
             source_valid = df_dict["source_valid"]
             source_test = df_dict["source_test"]
             res_col = add_total(fig, source_df, plot_params, side_arr=["merge_total"])
@@ -737,7 +753,6 @@ def total_line(
     height=450,
     plot_params=None,
 ):
-
     for i in plot_config:
         if i["name"] == "backtest":
             height_scale = i["height_scale"]
@@ -750,7 +765,11 @@ def total_line(
                 x_axis_type="datetime",
                 width=int(width),
                 height=int(height * height_scale),
-                output_backend="webgl",
+                output_backend=plot_params.get("output_backend", "webgl"),
+                lod_factor=plot_params.get("lod_factor", 10),  # 每 10 个像素一个数据点
+                lod_threshold=plot_params.get(
+                    "lod_threshold", 1000
+                ),  # 数据点少于 100 时禁用 LOD
             )
 
             color_arr = [
@@ -764,12 +783,12 @@ def total_line(
                 "gray",
             ]
             for k, v in enumerate(arr):
-                df = v["test_df"]
+                df = v["train_test_df"]
                 fig.line(
                     "origin_index",
                     "merge_total",
                     source=df,
-                    line_width=2,
+                    line_width=3,
                     line_alpha=1,
                     line_color=color_arr[k] if k < len(color_arr) else "black",
                     visible=True,
@@ -777,9 +796,10 @@ def total_line(
 
             _l = []
             for k, v in enumerate(arr):
-                test_start = v["split_dict"]["test_start"]
-                test_stop = v["split_dict"]["test_stop"]
-                _l.append(v["test_df"][test_start:test_stop])
+                # test_start = v["split_dict"]["test_start"]
+                # test_stop = v["split_dict"]["test_stop"]
+                # _l.append(v["test_df"][test_start:test_stop])
+                _l.append(v["test_df"])
             new_ohlcv_df = _l[0].iloc[0:0].copy()
             total = 0
             for _df in _l[:]:
@@ -963,3 +983,59 @@ def create_x_range(fig, df_dict, fig_array=[], columns_array=[]):
 
     common_x_range.js_on_change("end", callback)
     return common_x_range
+
+
+if __name__ == "__main__":
+    # 测试代码
+    # 生成示例数据
+    dates = pd.date_range(start="2023-01-01", periods=100, freq="H")
+    df = pd.DataFrame(
+        {
+            "date": dates,
+            "open": np.random.uniform(90, 110, 100),
+            "high": np.random.uniform(95, 115, 100),
+            "low": np.random.uniform(85, 105, 100),
+            "close": np.random.uniform(90, 110, 100),
+            "macd": np.random.uniform(-1, 1, 100),
+            "macdh": np.random.uniform(-0.5, 0.5, 100),
+            "long_price": np.random.uniform(90, 110, 100),
+            "short_price": np.random.uniform(90, 110, 100),
+            "long_status": np.random.choice([0, 2, -1], 100),
+            "short_status": np.random.choice([0, 2, -1], 100),
+            "long_idx2": np.arange(100) % 2,
+            "short_idx2": np.arange(100) % 2,
+            "merge_total": np.cumsum(np.random.uniform(-1, 1, 100)),
+            "long_sl": np.random.uniform(85, 90, 100),
+            "long_tp": np.random.uniform(110, 115, 100),
+            "long_tsl": np.random.uniform(95, 105, 100),
+            "short_sl": np.random.uniform(85, 90, 100),
+            "short_tp": np.random.uniform(110, 115, 100),
+            "short_tsl": np.random.uniform(95, 105, 100),
+        }
+    )
+    df["high"] = df[["open", "high", "close"]].max(axis=1)
+    df["low"] = df[["open", "low", "close"]].min(axis=1)
+
+    # 配置
+    plot_config = [
+        {"name": "candle", "show": True, "height_scale": 0.6},
+        {"name": "macd", "key": ["macd"], "show": True, "height_scale": 0.2},
+        {"name": "backtest", "show": True, "height_scale": 0.2},
+    ]
+    plot_params = {
+        "long_count": 5,
+        "short_count": 3,
+        "split_dict": {
+            "train_stop": 30,
+            "valid_start": 30,
+            "valid_stop": 60,
+            "test_start": 60,
+            "test_stop": 100,
+        },
+        "span_mode": True,
+    }
+
+    # 生成图表
+    df_dict = get_df_dict(df, plot_params)
+    fig = layout_plot(df_dict, plot_config, plot_params=plot_params)
+    fig.show()
