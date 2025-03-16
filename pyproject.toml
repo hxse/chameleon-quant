@@ -25,6 +25,7 @@ dependencies = [
     "anywidget>=0.9.13",
     "plotly>=6.0.0",
     "nbformat>=5.10.4",
+    "dash>=2.18.2",
 ]
 
 

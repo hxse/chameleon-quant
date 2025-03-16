@@ -48,7 +48,7 @@ def get_plot_config(df: pd.DataFrame) -> List[Dict[str, Any]]:
     ]
 
     for indicator in indicators:
-        if any(col in df.columns for col in indicator["key"]):
+        if len(filter_columns(indicator["key"], df.columns)) > 0:
             indicator["show"] = True
             plot_config.insert(1, indicator)
 
