@@ -780,7 +780,7 @@ def total_line(
                 "cyan",
                 "blue",
                 "purple",
-                "gray",
+                # "gray",
             ]
             for k, v in enumerate(arr):
                 df = v["train_test_df"]
@@ -788,9 +788,10 @@ def total_line(
                     "origin_index",
                     "merge_total",
                     source=df,
-                    line_width=3,
+                    line_width=1,
                     line_alpha=1,
-                    line_color=color_arr[k] if k < len(color_arr) else "black",
+                    line_color=color_arr[k] if k < len(color_arr) else "gray",
+                    # line_dash="dashed",
                     visible=True,
                 )
 
@@ -799,15 +800,21 @@ def total_line(
                 # test_start = v["split_dict"]["test_start"]
                 # test_stop = v["split_dict"]["test_stop"]
                 # _l.append(v["test_df"][test_start:test_stop])
+                # _l.append(v["train_test_df"].iloc[v["split_dict"]["test_start"] :])
                 _l.append(v["test_df"])
-            new_ohlcv_df = _l[0].iloc[0:0].copy()
-            total = 0
-            for _df in _l[:]:
-                _df = _df.copy()
-                _df["merge_total"] = _df["merge_total"] - _df["merge_total"].iloc[0]
-                _df["merge_total"] = _df["merge_total"] + total
-                new_ohlcv_df = pd.concat([new_ohlcv_df, _df], axis=0, join="outer")
-                total = new_ohlcv_df.iloc[-1]["merge_total"]
+            for k, _df in enumerate(_l):
+                if k == 0:
+                    new_ohlcv_df = _l[0].copy()
+                else:
+                    _df = _df.copy()
+                    diff = (
+                        new_ohlcv_df["merge_total"].iloc[-1]
+                        - _df["merge_total"].iloc[0]
+                    )
+                    _df["merge_total"] = _df["merge_total"] + (
+                        diff if diff > 0 else diff
+                    )
+                    new_ohlcv_df = pd.concat([new_ohlcv_df, _df])
             new_ohlcv_df.reset_index(inplace=True, drop=True)
             fig.line(
                 "origin_index",
