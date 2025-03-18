@@ -347,6 +347,7 @@ def process_data_segment(
             segment_df["date"].iloc[0],
             segment_df["date"].iloc[-1],
         )
+        is_nan_count = min(is_nan_count, len(origin_df))
         segment_df = fill_df(origin_df, segment_df, is_nan_count)
 
     result = get_result(segment_df, strategy, strategy_params, study)
@@ -396,9 +397,16 @@ def get_train_valid_test(
         strategy_params,
         study,
     )
+
+    train_valid_df = df.iloc[
+        split_dict["train_start"] : split_dict["valid_stop"]
+    ].copy()
+    train_valid_df.reset_index(drop=True, inplace=True)
+    train_valid_result = get_result(train_valid_df, strategy, strategy_params, study)
+
     test_df, test_result = process_data_segment(
         df,
-        valid_df,
+        train_valid_df,
         is_nan_count,
         split_dict["test_start"],
         split_dict["test_stop"],
@@ -406,12 +414,6 @@ def get_train_valid_test(
         strategy_params,
         study,
     )
-
-    train_valid_df = df.iloc[
-        split_dict["train_start"] : split_dict["valid_stop"]
-    ].copy()
-    train_valid_df.reset_index(drop=True, inplace=True)
-    train_valid_result = get_result(train_valid_df, strategy, strategy_params, study)
 
     train_valid_test_df = df.iloc[
         split_dict["train_start"] : split_dict["test_stop"]
